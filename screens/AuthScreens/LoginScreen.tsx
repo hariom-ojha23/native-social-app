@@ -5,15 +5,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
-import {
-  TextInput,
-  Button,
-  Divider,
-  Portal,
-  Dialog,
-  Paragraph,
-  Title,
-} from 'react-native-paper'
+import { TextInput, Button, Divider, Snackbar } from 'react-native-paper'
 import { Text } from '../../components/Themed'
 import { RootStackScreenProps } from '../../types'
 import { signInWithEmailAndPassword } from 'firebase/auth'
@@ -32,18 +24,20 @@ const LoginScreen = ({ navigation }: RootStackScreenProps<'Login'>) => {
     return emailRegex.test(email)
   }
 
-  const handleSignIn = () => {
+  const handleSignIn = async () => {
     if (isValid(email)) {
       if (password !== '') {
-        signInWithEmailAndPassword(auth, email, password)
+        await signInWithEmailAndPassword(auth, email, password)
           .then((userCredential) => {
             const user = userCredential.user
+            console.log(user)
             if (user) {
-              console.log(user)
+              navigation.replace('mainStack')
             }
           })
           .catch((error) => {
-            setMessage(error)
+            const errMessage = error.code.split('/')[1]
+            setMessage(errMessage)
             setShow(true)
           })
       } else {
@@ -51,12 +45,12 @@ const LoginScreen = ({ navigation }: RootStackScreenProps<'Login'>) => {
         setShow(true)
       }
     } else {
-      setMessage('Your email address is not valid. Please enter a valid email.')
+      setMessage('Email Invalid! Please enter a valid email.')
       setShow(true)
     }
   }
 
-  const handleAlertClose = () => {
+  const handleSnackClose = () => {
     setShow(false)
   }
 
@@ -71,7 +65,7 @@ const LoginScreen = ({ navigation }: RootStackScreenProps<'Login'>) => {
         <TextInput
           style={styles.input}
           mode='outlined'
-          placeholder='Email Address*'
+          label='Email Address*'
           textContentType='emailAddress'
           value={email}
           onChange={(e) => setEmail(e.nativeEvent.text)}
@@ -81,7 +75,7 @@ const LoginScreen = ({ navigation }: RootStackScreenProps<'Login'>) => {
           textContentType='password'
           mode='outlined'
           secureTextEntry
-          placeholder='Password*'
+          label='Password*'
           value={password}
           onChange={(e) => setPassword(e.nativeEvent.text)}
         />
@@ -103,17 +97,18 @@ const LoginScreen = ({ navigation }: RootStackScreenProps<'Login'>) => {
           <Text style={styles.registerLink}>Register now</Text>
         </TouchableOpacity>
       </View>
-      <Portal>
-        <Dialog visible={show} onDismiss={handleAlertClose}>
-          <Title style={styles.dialogTitle}>Invalid Credentials!</Title>
-          <Dialog.Content>
-            <Paragraph>{message}</Paragraph>
-          </Dialog.Content>
-          <Dialog.Actions>
-            <Button onPress={handleAlertClose}>Close</Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
+      <Snackbar
+        visible={show}
+        onDismiss={handleSnackClose}
+        action={{
+          label: 'Close',
+          onPress: () => {
+            handleSnackClose
+          },
+        }}
+      >
+        {message}
+      </Snackbar>
     </KeyboardAvoidingView>
   )
 }
@@ -160,10 +155,6 @@ const styles = StyleSheet.create({
   },
   registerLink: {
     fontSize: 17,
-  },
-  dialogTitle: {
-    paddingHorizontal: 25,
-    paddingVertical: 10,
   },
 })
 

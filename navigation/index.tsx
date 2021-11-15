@@ -14,6 +14,7 @@ import Colors from '../constants/Colors'
 import useColorScheme from '../hooks/useColorScheme'
 import LoginScreen from '../screens/AuthScreens/LoginScreen'
 import RegisterScreen from '../screens/AuthScreens/RegisterScreen'
+import CompleteProfileScreen from '../screens/AuthScreens/CompleteProfileScreen'
 import ModalScreen from '../screens/MainScreens/ModalScreen'
 import NotFoundScreen from '../screens/MainScreens/NotFoundScreen'
 import HomeScreen from '../screens/MainScreens/HomeScreen'
@@ -46,9 +47,17 @@ const Navigation = ({ colorScheme }: { colorScheme: ColorSchemeName }) => {
       linking={LinkingConfiguration}
       theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}
     >
-      <RootNavigator />
+      <AuthNavigator />
     </NavigationContainer>
   )
+  // return (
+  //   <NavigationContainer
+  //     linking={LinkingConfiguration}
+  //     theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}
+  //   >
+  //     <RootNavigator />
+  //   </NavigationContainer>
+  // )
 }
 
 /**
@@ -80,6 +89,11 @@ const RootNavigator = () => {
 const AuthNavigator = () => {
   return (
     <Stack.Navigator>
+      {/* <Stack.Screen
+        name='CompleteProfile'
+        component={CompleteProfileScreen}
+        options={{ headerShown: false }}
+      /> */}
       <Stack.Screen
         name='Login'
         component={LoginScreen}
@@ -88,6 +102,16 @@ const AuthNavigator = () => {
       <Stack.Screen
         name='Register'
         component={RegisterScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name='CompleteProfile'
+        component={CompleteProfileScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name='mainStack'
+        component={RootNavigator}
         options={{ headerShown: false }}
       />
     </Stack.Navigator>
@@ -125,6 +149,9 @@ const BottomTabNavigator = () => {
         options={({ navigation }: RootTabScreenProps<'Home'>) => ({
           title: 'Felix',
           tabBarIcon: ({ color }) => <IonIconIcon name='grid' color={color} />,
+          headerStyle: {
+            elevation: 0,
+          },
           headerTitleStyle: {
             fontSize: 24,
             letterSpacing: 1,

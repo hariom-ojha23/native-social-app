@@ -5,22 +5,14 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
-import {
-  TextInput,
-  Button,
-  Divider,
-  Portal,
-  Dialog,
-  Paragraph,
-  Title,
-} from 'react-native-paper'
+import { TextInput, Button, Divider, Snackbar } from 'react-native-paper'
 import { Text } from '../../components/Themed'
 import { RootStackScreenProps } from '../../types'
-import { createUserWithEmailAndPassword } from 'firebase/auth'
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { auth } from '../../Firebase/config'
 
 const RegisterScreen = ({ navigation }: RootStackScreenProps<'Register'>) => {
-  const [name, setName] = useState<string>('')
+  const [displayName, setDIsplayName] = useState<string>('')
   const [email, setEmail] = useState<string>('')
   const [password, setPassword] = useState<string>('')
   const [show, setShow] = useState<boolean>(false)
@@ -33,14 +25,17 @@ const RegisterScreen = ({ navigation }: RootStackScreenProps<'Register'>) => {
     return emailRegex.test(email)
   }
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (isValid(email)) {
-      if (name !== '' && password !== '') {
-        createUserWithEmailAndPassword(auth, email, password)
+      if (displayName !== '' && password !== '') {
+        await createUserWithEmailAndPassword(auth, email, password)
           .then((userCredential) => {
-            const user = userCredential.user
+            const { user } = userCredential
+            updateProfile(user, {
+              displayName,
+            })
             if (user) {
-              navigation.navigate('Login')
+              navigation.navigate('CompleteProfile')
             }
           })
           .catch((error) => {
@@ -52,12 +47,12 @@ const RegisterScreen = ({ navigation }: RootStackScreenProps<'Register'>) => {
         setShow(true)
       }
     } else {
-      setMessage('Your email address is not valid. Please enter a valid email.')
+      setMessage('Invalid Email! Please enter a valid email.')
       setShow(true)
     }
   }
 
-  const handleAlertClose = () => {
+  const handleSnackClose = () => {
     setShow(false)
   }
 
@@ -72,15 +67,15 @@ const RegisterScreen = ({ navigation }: RootStackScreenProps<'Register'>) => {
         <TextInput
           style={styles.input}
           mode='outlined'
-          value={name}
-          placeholder='Full Name*'
+          value={displayName}
+          label='Display Name*'
           textContentType='name'
-          onChange={(e) => setName(e.nativeEvent.text)}
+          onChange={(e) => setDIsplayName(e.nativeEvent.text)}
         />
         <TextInput
           style={styles.input}
           mode='outlined'
-          placeholder='Email Address*'
+          label='Email Address*'
           textContentType='emailAddress'
           value={email}
           onChange={(e) => setEmail(e.nativeEvent.text)}
@@ -90,7 +85,7 @@ const RegisterScreen = ({ navigation }: RootStackScreenProps<'Register'>) => {
           textContentType='password'
           mode='outlined'
           secureTextEntry
-          placeholder='Password*'
+          label='Password*'
           value={password}
           onChange={(e) => setPassword(e.nativeEvent.text)}
         />
@@ -106,23 +101,24 @@ const RegisterScreen = ({ navigation }: RootStackScreenProps<'Register'>) => {
         </Button>
       </View>
       <Divider />
-      <View style={styles.registerLinkContainer}>
-        <Text style={styles.registerLink}>Already have an account? </Text>
+      <View style={styles.loginLinkContainer}>
+        <Text style={styles.loginLink}>Already have an account? </Text>
         <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-          <Text style={styles.registerLink}>Sign In</Text>
+          <Text style={styles.loginLink}>Sign In</Text>
         </TouchableOpacity>
       </View>
-      <Portal>
-        <Dialog visible={show} onDismiss={handleAlertClose}>
-          <Title style={styles.dialogTitle}>Invalid Credentials!</Title>
-          <Dialog.Content>
-            <Paragraph>{message}</Paragraph>
-          </Dialog.Content>
-          <Dialog.Actions>
-            <Button onPress={handleAlertClose}>Close</Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
+      <Snackbar
+        visible={show}
+        onDismiss={handleSnackClose}
+        action={{
+          label: 'Close',
+          onPress: () => {
+            handleSnackClose
+          },
+        }}
+      >
+        {message}
+      </Snackbar>
     </KeyboardAvoidingView>
   )
 }
@@ -163,17 +159,13 @@ const styles = StyleSheet.create({
     marginTop: 20,
     backgroundColor: '#007fff',
   },
-  registerLinkContainer: {
+  loginLinkContainer: {
     display: 'flex',
     flexDirection: 'row',
     marginTop: 20,
   },
-  registerLink: {
+  loginLink: {
     fontSize: 17,
-  },
-  dialogTitle: {
-    paddingHorizontal: 25,
-    paddingVertical: 10,
   },
 })
 
