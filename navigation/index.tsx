@@ -32,32 +32,24 @@ import { auth } from '../Firebase/config'
 const Navigation = ({ colorScheme }: { colorScheme: ColorSchemeName }) => {
   const userInfo = auth.currentUser
 
-  if (!userInfo) {
-    return (
-      <NavigationContainer
-        linking={LinkingConfiguration}
-        theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}
-      >
-        <AuthNavigator />
-      </NavigationContainer>
-    )
-  }
+  // if (!userInfo) {
+  //   return (
+  //     <NavigationContainer
+  //       linking={LinkingConfiguration}
+  //       theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}
+  //     >
+  //       <AuthNavigator />
+  //     </NavigationContainer>
+  //   )
+  // }
   return (
     <NavigationContainer
       linking={LinkingConfiguration}
       theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}
     >
-      <AuthNavigator />
+      <RootNavigator />
     </NavigationContainer>
   )
-  // return (
-  //   <NavigationContainer
-  //     linking={LinkingConfiguration}
-  //     theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}
-  //   >
-  //     <RootNavigator />
-  //   </NavigationContainer>
-  // )
 }
 
 /**

@@ -94,7 +94,7 @@ const CompleteProfileScreen = ({
       const response = await fetch(uri)
       const imageBlob = await response.blob()
 
-      const storageRef = ref(storage, `${currentUser?.uid}/photos/profilePhoto`)
+      const storageRef = ref(storage, `users/${currentUser?.uid}/profilePhoto`)
       const uploadTask = uploadBytesResumable(storageRef, imageBlob)
 
       uploadTask.on(
