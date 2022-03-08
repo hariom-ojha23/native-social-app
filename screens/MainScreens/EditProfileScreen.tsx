@@ -1,41 +1,34 @@
 import React, { useState, useEffect } from 'react'
+import { StyleSheet, Platform, KeyboardAvoidingView } from 'react-native'
+import { View } from '../../components/Themed'
+
+import Colors from '../../constants/Colors'
+import useColorScheme from '../../hooks/useColorScheme'
 import { RootStackScreenProps } from '../../types'
-import { StyleSheet, View, Platform, LogBox } from 'react-native'
-import {
-  TextInput,
-  Button,
-  Snackbar,
-  Caption,
-  Headline,
-  Avatar,
-  IconButton,
-} from 'react-native-paper'
-import DateTimePicker from '@react-native-community/datetimepicker'
-import * as ImagePicker from 'expo-image-picker'
-import moment from 'moment'
 import { auth, db, storage } from '../../Firebase/config'
-import { collection, addDoc } from 'firebase/firestore'
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
-import { updateProfile } from '@firebase/auth'
+import * as ImagePicker from 'expo-image-picker'
+import { Avatar, IconButton, Snackbar, TextInput } from 'react-native-paper'
+import { ScrollView } from 'react-native-gesture-handler'
 
-const CompleteProfileScreen = ({
+const EditProfileScreen = ({
   navigation,
-}: RootStackScreenProps<'CompleteProfile'>) => {
-  LogBox.ignoreLogs(['Setting a timer'])
-
+}: RootStackScreenProps<'EditProfile'>) => {
   const { currentUser } = auth
 
-  const [userName, setUserName] = useState<string>('')
-  const [bio, setBio] = useState<string>('')
-  const [dob, setDOB] = useState<Date>(new Date())
-  const [stringDOB, setStringDOB] = useState<string>('')
+  const colorScheme = useColorScheme()
+  const colors = Colors[colorScheme]
+
   const [profilePhoto, setProfilePhoto] = useState<string>(
     'https://picsum.photos/1000'
   )
+  const [displayName, setDisplayName] = useState<string>('')
+  const [userName, setUserName] = useState<string>('')
+  const [bio, setBio] = useState<string>('')
+  const [email, setEmail] = useState<string>('')
   const [photoURL, setPhotoURL] = useState<string | null>(null)
   const [show, setShow] = useState<boolean>(false)
   const [message, setMessage] = useState<string | null>(null)
-  const [datePickerShow, setDatePickerShow] = useState<boolean>(false)
 
   useEffect(() => {
     ;(async () => {
@@ -48,21 +41,6 @@ const CompleteProfileScreen = ({
       }
     })()
   }, [])
-
-  // selecting date of birth and converting to string
-  const onSelectDob = (_: any, selectedDate: Date | any) => {
-    const currentDate = selectedDate || dob
-    setDatePickerShow(Platform.OS === 'ios')
-    if (currentDate !== dob) {
-      setDOB(currentDate)
-      changeDateToString(currentDate)
-    }
-  }
-
-  const changeDateToString = (currentDate: Date) => {
-    const formatedDate = moment(currentDate).format('D MMMM YYYY')
-    setStringDOB(formatedDate)
-  }
 
   // selecting profile pic
   const pickProfilePicture = async () => {
@@ -121,51 +99,27 @@ const CompleteProfileScreen = ({
     }
   }
 
-  // adding user to firestore
-  const handleCreateUser = async () => {
-    if (photoURL !== null) {
-      if (userName !== '' && bio !== '' && stringDOB !== '') {
-        try {
-          if (currentUser !== null && photoURL !== null) {
-            updateProfile(currentUser, {
-              photoURL,
-            })
-          }
-          await addDoc(collection(db, 'users'), {
-            displayName: currentUser?.displayName,
-            userName,
-            email: currentUser?.email,
-            bio,
-            dob,
-            photoURL,
-            uid: currentUser?.uid,
-          })
-          navigation.navigate('MainStack')
-        } catch (e) {
-          console.error('Error adding document: ', e)
-        }
-      } else {
-        setMessage('All fields are required')
-        setShow(true)
-      }
-    } else {
-      setMessage('Please provide a profile photo')
-      setShow(true)
-    }
-  }
-
-  // to close snackbar
   const handleSnackClose = () => {
     setShow(false)
   }
 
   return (
     <View style={styles.container}>
-      <View style={styles.titleContainer}>
-        <Headline style={styles.title}>Complete Profile</Headline>
-        <Caption style={styles.subtitle}>
-          Add a profile photo, username and bio to let people know who you are
-        </Caption>
+      <View style={styles.controllerContainer}>
+        <IconButton
+          style={styles.controller}
+          icon='close'
+          color={colors.text}
+          size={24}
+          onPress={() => navigation.navigate('Profile')}
+        />
+        <IconButton
+          style={styles.controller}
+          icon='check'
+          color={colors.text}
+          size={24}
+          onPress={() => console.log('Pressed')}
+        />
       </View>
       <View style={styles.selectProfileContainer}>
         <Avatar.Image size={120} source={{ uri: profilePhoto }} />
@@ -181,41 +135,39 @@ const CompleteProfileScreen = ({
         <TextInput
           style={styles.input}
           mode='outlined'
+          value={displayName}
+          label='DIsplay Name'
+          textContentType='name'
+          onChange={(e) => setDisplayName(e.nativeEvent.text)}
+          left={<TextInput.Icon name='account' color='gray' />}
+        />
+        <TextInput
+          style={styles.input}
+          mode='outlined'
           value={userName}
-          label='User Name*'
+          label='User Name'
           textContentType='username'
           onChange={(e) => setUserName(e.nativeEvent.text)}
+          left={<TextInput.Icon name='account' color='gray' />}
         />
         <TextInput
           style={styles.input}
           mode='outlined'
-          label='Bio*'
           value={bio}
+          label='Bio'
+          textContentType='none'
           onChange={(e) => setBio(e.nativeEvent.text)}
+          left={<TextInput.Icon name='information' color='gray' />}
         />
         <TextInput
           style={styles.input}
           mode='outlined'
-          label='Date of Birth*'
-          value={stringDOB}
-          right={
-            <TextInput.Icon
-              onPress={() => setDatePickerShow(true)}
-              name='calendar-blank-outline'
-            />
-          }
-          onChange={(e) => setStringDOB(e.nativeEvent.text)}
+          value={email}
+          label='Email'
+          textContentType='emailAddress'
+          onChange={(e) => setEmail(e.nativeEvent.text)}
+          left={<TextInput.Icon name='email' color='gray' />}
         />
-      </View>
-      <View style={styles.buttonContainer}>
-        <Button
-          style={styles.button}
-          mode='contained'
-          onPress={handleCreateUser}
-          labelStyle={{ fontSize: 17, padding: 8 }}
-        >
-          Finish
-        </Button>
       </View>
       <Snackbar
         visible={show}
@@ -223,22 +175,12 @@ const CompleteProfileScreen = ({
         action={{
           label: 'Close',
           onPress: () => {
-            handleSnackClose
+            setShow(false)
           },
         }}
       >
         {message}
       </Snackbar>
-      {datePickerShow && (
-        <DateTimePicker
-          testID='dateTimePicker'
-          value={dob}
-          mode='date'
-          is24Hour={true}
-          display='default'
-          onChange={onSelectDob}
-        />
-      )}
     </View>
   )
 }
@@ -247,7 +189,16 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
+  },
+  controllerContainer: {
+    display: 'flex',
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'space-between',
+    marginVertical: 50,
+  },
+  controller: {
+    marginHorizontal: 25,
   },
   selectProfileContainer: {
     position: 'relative',
@@ -260,34 +211,15 @@ const styles = StyleSheet.create({
     borderColor: 'white',
     borderWidth: 1.5,
   },
-  titleContainer: {
-    marginBottom: 20,
-    width: '80%',
-  },
-  title: {
-    fontSize: 28,
-    textAlign: 'center',
-  },
-  subtitle: {
-    fontSize: 18,
-    textAlign: 'center',
-    marginTop: 10,
-  },
   inputContainer: {
-    width: '80%',
+    width: '85%',
+    alignSelf: 'center',
+    marginTop: 20,
   },
   input: {
     marginTop: 12,
     borderStartColor: 'white',
   },
-  buttonContainer: {
-    width: '80%',
-  },
-  button: {
-    width: '100%',
-    marginTop: 20,
-    backgroundColor: '#007fff',
-  },
 })
 
-export default CompleteProfileScreen
+export default EditProfileScreen

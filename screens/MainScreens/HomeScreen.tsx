@@ -65,7 +65,7 @@ const stories = [
 const HomeScreen = ({ navigation }: RootTabScreenProps<'Home'>) => {
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.storyContainer}>
+      {/* <View style={styles.storyContainer}>
         <FlatList
           contentContainerStyle={styles.storyList}
           data={stories}
@@ -74,7 +74,7 @@ const HomeScreen = ({ navigation }: RootTabScreenProps<'Home'>) => {
           horizontal
           showsHorizontalScrollIndicator={false}
         />
-      </View>
+      </View> */}
       <FlatList
         contentContainerStyle={styles.postList}
         data={posts}
@@ -89,6 +89,7 @@ const HomeScreen = ({ navigation }: RootTabScreenProps<'Home'>) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    marginBottom: 75,
   },
   storyContainer: {
     padding: 15,
@@ -102,7 +103,6 @@ const styles = StyleSheet.create({
   },
   postList: {
     padding: 15,
-    paddingBottom: 100,
   },
 })
 

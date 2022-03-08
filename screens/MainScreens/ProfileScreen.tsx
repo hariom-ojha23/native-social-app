@@ -1,86 +1,134 @@
-import React from 'react'
-import {
-  StyleSheet,
-  ScrollView,
-  SafeAreaView,
-  ImageBackground,
-  View,
-  FlatList,
-} from 'react-native'
-import { Text } from '../../components/Themed'
-import {
-  Avatar,
-  Button,
-  Headline,
-  Subheading,
-  Title,
-  Caption,
-} from 'react-native-paper'
+import React, { useState } from 'react'
+import { StyleSheet, FlatList, useWindowDimensions } from 'react-native'
+import { Appbar, List } from 'react-native-paper'
+import { View } from '../../components/Themed'
+import Animated, {
+  useAnimatedGestureHandler,
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from 'react-native-reanimated'
+import { PanGestureHandler } from 'react-native-gesture-handler'
+import { posts } from '../../FakeData/posts'
+
+import { RootStackScreenProps } from '../../types'
 import ProfileInfoComponent from '../../components/ProfileScreen/ProfileInfoComponent'
 import PostListComponent from '../../components/ProfileScreen/PostListComponent'
+import { AntDesign, Feather, Ionicons } from '@expo/vector-icons'
+import useColorScheme from '../../hooks/useColorScheme'
+import Colors from '../../constants/Colors'
 
-const posts = [
-  {
-    id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-    url: 'https://picsum.photos/500',
-  },
-  {
-    id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-    url: 'https://picsum.photos/550',
-  },
-  {
-    id: '58694a0f-3da1-471f-bd96-145571e29d72',
-    url: 'https://picsum.photos/600',
-  },
-  {
-    id: '3ac68afv-c605-48d3-a4f8-fbd91aa97f63',
-    url: 'https://picsum.photos/950',
-  },
-  {
-    id: '58694a0g-3da1-471f-bd96-145571e29d70',
-    url: 'https://picsum.photos/900',
-  },
-  {
-    id: '58694a0e-3da1-471f-bd96-145571e29d76',
-    url: 'https://picsum.photos/100',
-  },
-  {
-    id: '3ac68afn-c605-48d3-a4f8-fbd91aa97f63',
-    url: 'https://picsum.photos/250',
-  },
-  {
-    id: '58694a0q-3da1-471f-bd96-145571e29d74',
-    url: 'https://picsum.photos/300',
-  },
-  {
-    id: '58694a0e-3da1-471f-bd96-145571e29d73',
-    url: 'https://picsum.photos/100',
-  },
-  {
-    id: '3ac68afn-c605-48d3-a4f8-fbd91aa97f62',
-    url: 'https://picsum.photos/250',
-  },
-  {
-    id: '58694a0q-3da1-471f-bd96-145571e29d71',
-    url: 'https://picsum.photos/300',
-  },
-]
+const SpringConfig = {
+  damping: 80,
+  overshootClamping: true,
+  restDisplacementThreshold: 0.1,
+  restSpeedThreshold: 0.1,
+  stiffness: 500,
+}
 
-const ProfileScreen = () => {
+const ProfileScreen = ({ navigation }: RootStackScreenProps<'MainStack'>) => {
+  const colorScheme = useColorScheme()
+  const colors = Colors[colorScheme]
+
+  const [userName, setUserName] = useState('')
+
+  const dimensions = useWindowDimensions()
+  const top = useSharedValue(dimensions.height + 100)
+
+  const style = useAnimatedStyle(() => {
+    return {
+      top: withSpring(top.value, SpringConfig),
+    }
+  })
+
+  const onPress = () => {
+    top.value = withSpring(dimensions.height / 2 + 100, SpringConfig)
+  }
+
+  const gestureHandler = useAnimatedGestureHandler({
+    onStart(_, context: any) {
+      context.startTop = top.value
+    },
+
+    onActive(event, context) {
+      top.value = context.startTop + event.translationY
+    },
+
+    onEnd() {
+      if (top.value > dimensions.height / 2 + 200) {
+        top.value = dimensions.height + 100
+      } else {
+        top.value = dimensions.height / 2 + 100
+      }
+    },
+  })
+
   return (
-    <SafeAreaView style={styles.safeView}>
-      <FlatList
-        // style={styles.postList}
-        ListHeaderComponent={<ProfileInfoComponent />}
-        data={posts}
-        keyExtractor={(item) => item.id}
-        renderItem={PostListComponent}
-        showsVerticalScrollIndicator={false}
-        columnWrapperStyle={styles.columnWrapperStyle}
-        numColumns={2}
-        horizontal={false}
-      />
-    </SafeAreaView>
+    <>
+      <Appbar.Header style={{ backgroundColor: colors.background }}>
+        <Appbar.Content title={userName} />
+        <Appbar.Action icon='menu-open' onPress={onPress} />
+      </Appbar.Header>
+      <View style={styles.safeView}>
+        <FlatList
+          style={styles.postList}
+          ListHeaderComponent={
+            <ProfileInfoComponent setUserName={setUserName} />
+          }
+          data={posts}
+          keyExtractor={(item) => item.id}
+          renderItem={PostListComponent}
+          showsVerticalScrollIndicator={false}
+          columnWrapperStyle={styles.columnWrapperStyle}
+          numColumns={2}
+          horizontal={false}
+        />
+      </View>
+      <PanGestureHandler onGestureEvent={gestureHandler}>
+        <Animated.View
+          style={[
+            styles.animatedView,
+            style,
+            {
+              top: dimensions.height + 100,
+              backgroundColor: colors.background,
+            },
+          ]}
+        >
+          <View style={styles.bottomSheetHandle} />
+          <View>
+            <List.Item
+              style={styles.listItem}
+              title='Edit Profile'
+              left={() => <Feather style={styles.listIcon} name='edit' />}
+              onPress={() => navigation.navigate('EditProfile')}
+            />
+            <List.Item
+              style={styles.listItem}
+              title='Settings'
+              left={() => (
+                <Ionicons style={styles.listIcon} name='settings-outline' />
+              )}
+              onPress={() => console.log('settings')}
+            />
+            <List.Item
+              style={styles.listItem}
+              title='Saved Posts'
+              left={() => (
+                <Ionicons style={styles.listIcon} name='bookmark-outline' />
+              )}
+              onPress={() => console.log('saved posts')}
+            />
+            <List.Item
+              style={styles.listItem}
+              title='Logout'
+              left={() => <AntDesign style={styles.listIcon} name='logout' />}
+              onPress={() => console.log('logout')}
+            />
+          </View>
+        </Animated.View>
+      </PanGestureHandler>
+    </>
   )
 }
 
@@ -89,12 +137,48 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   postList: {
-    paddingBottom: 100,
+    marginBottom: 75,
   },
   columnWrapperStyle: {
     flex: 1,
     flexWrap: 'wrap',
     paddingHorizontal: 15,
+    justifyContent: 'space-between',
+  },
+  animatedView: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 6,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 5,
+    elevation: 10,
+    paddingVertical: 20,
+  },
+  bottomSheetHandle: {
+    width: 50,
+    height: 6,
+    backgroundColor: 'gray',
+    borderRadius: 25,
+    alignSelf: 'center',
+    marginBottom: 15,
+  },
+  listItem: {
+    color: 'black',
+    paddingHorizontal: 25,
+  },
+  listIcon: {
+    alignSelf: 'center',
+    color: 'gray',
+    marginRight: 30,
+    fontSize: 24,
   },
 })
 

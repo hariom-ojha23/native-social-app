@@ -1,14 +1,11 @@
 import React, { useState } from 'react'
-import {
-  KeyboardAvoidingView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native'
-import { TextInput, Button, Divider, Snackbar } from 'react-native-paper'
+import { StyleSheet, TouchableOpacity, View } from 'react-native'
+import { TextInput, Button, Snackbar } from 'react-native-paper'
 import { Text } from '../../components/Themed'
+import { useKeyboard } from '../../hooks/useKeyboard'
 import { RootStackScreenProps } from '../../types'
 import { signInWithEmailAndPassword } from 'firebase/auth'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { auth } from '../../Firebase/config'
 
 const LoginScreen = ({ navigation }: RootStackScreenProps<'Login'>) => {
@@ -20,19 +17,27 @@ const LoginScreen = ({ navigation }: RootStackScreenProps<'Login'>) => {
   const emailRegex =
     /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
-  const isValid = (email: string) => {
-    return emailRegex.test(email)
+  const isValid = (enteredEmail: string) => {
+    return emailRegex.test(enteredEmail)
   }
+
+  const isKeyBoardOpen = useKeyboard()
 
   const handleSignIn = async () => {
     if (isValid(email)) {
       if (password !== '') {
         await signInWithEmailAndPassword(auth, email, password)
-          .then((userCredential) => {
+          .then(async (userCredential) => {
             const user = userCredential.user
             console.log(user)
             if (user) {
-              navigation.replace('mainStack')
+              try {
+                await AsyncStorage.setItem('uid', user.uid)
+                  .then(() => navigation.replace('MainStack'))
+                  .catch((error) => console.log(error))
+              } catch (e) {
+                console.log(e)
+              }
             }
           })
           .catch((error) => {
@@ -55,47 +60,57 @@ const LoginScreen = ({ navigation }: RootStackScreenProps<'Login'>) => {
   }
 
   return (
-    <KeyboardAvoidingView style={styles.container}>
-      <View style={styles.titleContainer}>
-        <Text style={styles.title}>Hello Again!</Text>
-        <Text style={styles.subtitle}>Welcome back you've been missed</Text>
+    <View style={styles.container}>
+      <View style={styles.bottomView}>
+        {!isKeyBoardOpen && (
+          <>
+            <Text style={styles.title}>Hello Again!</Text>
+            <Text style={styles.subtitle}>
+              We missed you! Login to get started
+            </Text>
+          </>
+        )}
       </View>
-
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          mode='outlined'
-          label='Email Address*'
-          textContentType='emailAddress'
-          value={email}
-          onChange={(e) => setEmail(e.nativeEvent.text)}
-        />
-        <TextInput
-          style={styles.input}
-          textContentType='password'
-          mode='outlined'
-          secureTextEntry
-          label='Password*'
-          value={password}
-          onChange={(e) => setPassword(e.nativeEvent.text)}
-        />
-      </View>
-      <View style={styles.buttonContainer}>
-        <Button
-          style={styles.loginButton}
-          mode='contained'
-          onPress={handleSignIn}
-          labelStyle={{ fontSize: 17, padding: 10 }}
-        >
-          Sign In
-        </Button>
-      </View>
-      <Divider />
-      <View style={styles.registerLinkContainer}>
-        <Text style={styles.registerLink}>Don't have an account? </Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-          <Text style={styles.registerLink}>Register now</Text>
-        </TouchableOpacity>
+      <View style={styles.upperView}>
+        <Text style={styles.login}>Login</Text>
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            mode='outlined'
+            label='Email Address'
+            textContentType='emailAddress'
+            value={email}
+            onChange={(e) => setEmail(e.nativeEvent.text)}
+            left={<TextInput.Icon name='account' color='gray' />}
+          />
+          <TextInput
+            style={styles.input}
+            textContentType='password'
+            mode='outlined'
+            secureTextEntry
+            label='Password'
+            value={password}
+            onChange={(e) => setPassword(e.nativeEvent.text)}
+            left={<TextInput.Icon name='lock' color='gray' />}
+          />
+          <Button
+            style={styles.loginButton}
+            mode='contained'
+            onPress={handleSignIn}
+            labelStyle={{ fontSize: 17, padding: 10 }}
+          >
+            Sign In
+          </Button>
+        </View>
+        <View>
+          <TouchableOpacity
+            style={styles.registerLinkContainer}
+            onPress={() => navigation.navigate('Register')}
+          >
+            <Text style={styles.registerLink}>Don't have an account? </Text>
+            <Text style={styles.registerLink}>Register now</Text>
+          </TouchableOpacity>
+        </View>
       </View>
       <Snackbar
         visible={show}
@@ -103,13 +118,13 @@ const LoginScreen = ({ navigation }: RootStackScreenProps<'Login'>) => {
         action={{
           label: 'Close',
           onPress: () => {
-            handleSnackClose
+            setShow(false)
           },
         }}
       >
         {message}
       </Snackbar>
-    </KeyboardAvoidingView>
+    </View>
   )
 }
 
@@ -118,30 +133,56 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
   },
-  titleContainer: {
-    marginBottom: 20,
-    width: '65%',
+  bottomView: {
+    backgroundColor: '#007fff',
+    width: '100%',
+    justifyContent: 'center',
+    height: '35%',
+    position: 'absolute',
+    top: 0,
+    zIndex: 1,
+  },
+  upperView: {
+    zIndex: 2,
+    borderTopLeftRadius: 30,
+    borderTopRightRadius: 30,
+    height: '75%',
+    width: '100%',
+    backgroundColor: 'white',
+    position: 'absolute',
+    bottom: 0,
   },
   title: {
-    fontSize: 30,
-    textAlign: 'center',
+    fontSize: 26,
     fontWeight: '700',
+    marginHorizontal: 25,
+    color: 'white',
+    letterSpacing: 0.5,
   },
   subtitle: {
-    fontSize: 22,
-    textAlign: 'center',
+    fontSize: 20,
     fontWeight: '600',
-    marginTop: 10,
+    marginTop: 5,
+    marginHorizontal: 25,
+    color: 'white',
+    letterSpacing: 0.5,
+  },
+  login: {
+    marginHorizontal: 25,
+    marginVertical: 30,
+    fontSize: 23,
+    fontWeight: '700',
+    textTransform: 'uppercase',
   },
   inputContainer: {
-    width: '80%',
+    width: '85%',
+    alignSelf: 'center',
+    marginTop: 20,
   },
   input: {
     marginTop: 12,
-  },
-  buttonContainer: {
-    width: '80%',
   },
   loginButton: {
     width: '100%',
@@ -151,7 +192,8 @@ const styles = StyleSheet.create({
   registerLinkContainer: {
     display: 'flex',
     flexDirection: 'row',
-    marginTop: 20,
+    justifyContent: 'center',
+    marginTop: 25,
   },
   registerLink: {
     fontSize: 17,

@@ -1,5 +1,5 @@
 import React from 'react'
-import { View, Image } from 'react-native'
+import { Image, TouchableOpacity } from 'react-native'
 import styles from './style'
 
 interface PostListItem {
@@ -10,9 +10,9 @@ interface PostListItem {
 const PostListComponent = (props: { item: PostListItem }) => {
   const { item } = props
   return (
-    <View style={styles.postContainer}>
+    <TouchableOpacity style={styles.postContainer}>
       <Image style={styles.postImage} source={{ uri: `${item.url}` }} />
-    </View>
+    </TouchableOpacity>
   )
 }
 

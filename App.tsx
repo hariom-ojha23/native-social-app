@@ -7,10 +7,13 @@ import useColorScheme from './hooks/useColorScheme'
 import Navigation from './navigation'
 
 import { Provider } from 'react-native-paper'
+import { LogBox } from 'react-native'
 
 export default function App() {
   const isLoadingComplete = useCachedResources()
   const colorScheme = useColorScheme()
+
+  LogBox.ignoreAllLogs(true)
 
   if (!isLoadingComplete) {
     return null

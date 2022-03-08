@@ -15,7 +15,7 @@ import useColorScheme from '../hooks/useColorScheme'
 import LoginScreen from '../screens/AuthScreens/LoginScreen'
 import RegisterScreen from '../screens/AuthScreens/RegisterScreen'
 import CompleteProfileScreen from '../screens/AuthScreens/CompleteProfileScreen'
-import ModalScreen from '../screens/MainScreens/ModalScreen'
+import SearchScreen from '../screens/MainScreens/SearchScreen'
 import NotFoundScreen from '../screens/MainScreens/NotFoundScreen'
 import HomeScreen from '../screens/MainScreens/HomeScreen'
 import ChatScreen from '../screens/MainScreens/ChatScreen'
@@ -28,20 +28,23 @@ import {
 } from '../types'
 import LinkingConfiguration from './LinkingConfiguration'
 import { auth } from '../Firebase/config'
+import EditProfileScreen from '../screens/MainScreens/EditProfileScreen'
+import OtherUserProfileScreen from '../screens/MainScreens/OtherUserProfileScreen'
 
 const Navigation = ({ colorScheme }: { colorScheme: ColorSchemeName }) => {
   const userInfo = auth.currentUser
 
-  // if (!userInfo) {
-  //   return (
-  //     <NavigationContainer
-  //       linking={LinkingConfiguration}
-  //       theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}
-  //     >
-  //       <AuthNavigator />
-  //     </NavigationContainer>
-  //   )
-  // }
+  if (!userInfo) {
+    return (
+      <NavigationContainer
+        linking={LinkingConfiguration}
+        theme={colorScheme === 'dark' ? DarkTheme : DefaultTheme}
+      >
+        <AuthNavigator />
+      </NavigationContainer>
+    )
+  }
+
   return (
     <NavigationContainer
       linking={LinkingConfiguration}
@@ -71,8 +74,24 @@ const RootNavigator = () => {
         component={NotFoundScreen}
         options={{ title: 'Oops!' }}
       />
+      <Stack.Screen
+        name='EditProfile'
+        component={EditProfileScreen}
+        options={{ headerShown: false }}
+      />
       <Stack.Group screenOptions={{ presentation: 'modal' }}>
-        <Stack.Screen name='Modal' component={ModalScreen} />
+        <Stack.Screen
+          name='Search'
+          component={SearchScreen}
+          options={{ headerShown: false }}
+        />
+      </Stack.Group>
+      <Stack.Group screenOptions={{ presentation: 'modal' }}>
+        <Stack.Screen
+          name='OthersProfile'
+          component={OtherUserProfileScreen}
+          options={{ headerShown: false }}
+        />
       </Stack.Group>
     </Stack.Navigator>
   )
@@ -81,11 +100,6 @@ const RootNavigator = () => {
 const AuthNavigator = () => {
   return (
     <Stack.Navigator>
-      {/* <Stack.Screen
-        name='CompleteProfile'
-        component={CompleteProfileScreen}
-        options={{ headerShown: false }}
-      /> */}
       <Stack.Screen
         name='Login'
         component={LoginScreen}
@@ -102,7 +116,7 @@ const AuthNavigator = () => {
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name='mainStack'
+        name='MainStack'
         component={RootNavigator}
         options={{ headerShown: false }}
       />
@@ -151,7 +165,7 @@ const BottomTabNavigator = () => {
           },
           headerRight: () => (
             <Pressable
-              onPress={() => navigation.navigate('Modal')}
+              onPress={() => navigation.navigate('Search')}
               style={({ pressed }) => ({
                 opacity: pressed ? 0.5 : 1,
                 marginRight: 20,
@@ -192,7 +206,7 @@ const BottomTabNavigator = () => {
           title: 'Chats',
           tabBarIcon: () => (
             <TouchableOpacity
-              activeOpacity={0.7}
+              activeOpacity={1}
               style={{
                 position: 'relative',
                 borderRadius: 50,
@@ -228,6 +242,7 @@ const BottomTabNavigator = () => {
           tabBarIcon: ({ color }) => (
             <IonIconIcon name='person' color={color} />
           ),
+          headerShown: false,
         }}
       />
     </BottomTab.Navigator>

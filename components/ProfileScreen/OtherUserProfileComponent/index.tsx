@@ -5,72 +5,141 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { Text, View } from '../../Themed'
 import styles from './style'
 import { db } from '../../../Firebase/config'
-import { doc, onSnapshot } from 'firebase/firestore'
+import {
+  arrayRemove,
+  arrayUnion,
+  doc,
+  onSnapshot,
+  updateDoc,
+} from 'firebase/firestore'
 
-const ProfileInfoComponent = ({ setUserName }: any) => {
+const ProfileInfoComponent = ({ setUserName, id }: any) => {
   const [mediaType, setMediaType] = useState('images')
-  const [userId, setUserId] = useState<string | null>(null)
+  const [userId, setUserId] = useState<string>('')
   const [displayName, setDisplayName] = useState<string>('')
   const [bio, setBio] = useState<string>('')
   const [profileURL, setProfileURL] = useState<string>('')
-  const [followerList, setFollowerList] = useState([])
   const [followerCount, setFollowerCount] = useState(0)
-  const [followingList, setFollowingList] = useState([])
   const [followingCount, setFollowingCount] = useState(0)
+  const [isFollowing, setIsFollwing] = useState(false)
 
   const getData = async () => {
     AsyncStorage.getItem('uid')
       .then((res) => {
-        setUserId(res)
+        if (res !== null) {
+          setUserId(res)
+        }
       })
       .catch((error) => {
         console.log(error)
       })
   }
 
-  const addData = async (data: any) => {
-    try {
-      await AsyncStorage.setItem('userData', JSON.stringify(data))
-        .then(() => console.log('Data Added'))
-        .catch((error) => console.log(error))
-    } catch (e) {
-      console.log(e)
-    }
+  const removeFromFollowerList = async () => {
+    const followerRef = doc(db, 'followers', id)
+
+    await updateDoc(followerRef, {
+      followerList: arrayRemove(userId),
+    })
+      .then(() => {
+        console.log('Removed from followers')
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+  }
+
+  const removeFromFollowingList = async () => {
+    const followingRef = doc(db, 'followings', userId)
+
+    await updateDoc(followingRef, {
+      followingList: arrayRemove(id),
+    })
+      .then(() => {
+        console.log('Removed from followings')
+        setIsFollwing(false)
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+  }
+
+  const addToFollowerList = async () => {
+    const followerRef = doc(db, 'followers', id)
+
+    await updateDoc(followerRef, {
+      followerList: arrayUnion(userId),
+    })
+      .then(() => {
+        console.log('added in followers')
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+  }
+  const addToFollowingList = async () => {
+    const followingRef = doc(db, 'followings', userId)
+
+    await updateDoc(followingRef, {
+      followingList: arrayUnion(id),
+    })
+      .then(() => {
+        console.log('added in followings')
+        setIsFollwing(true)
+      })
+      .catch((error) => {
+        console.log(error)
+      })
   }
 
   useEffect(() => {
-    if (userId !== null) {
-      console.log(userId)
-      onSnapshot(doc(db, 'users', userId), (snap) => {
+    getData()
+  }, [])
+
+  useEffect(() => {
+    if (id !== null && id !== '' && id !== undefined) {
+      onSnapshot(doc(db, 'users', id), (snap) => {
         if (snap.data() !== undefined) {
           const data = snap.data()
           setBio(data?.bio)
           setDisplayName(data?.displayName)
           setUserName(data?.userName)
           setProfileURL(data?.profilePhotoUrl)
-          addData(data)
         }
       })
+    }
+  }, [id])
 
-      onSnapshot(doc(db, 'followers', userId), (document) => {
+  useEffect(() => {
+    if (id !== null && id !== '' && id !== undefined) {
+      onSnapshot(doc(db, 'followers', id), (document) => {
         if (document.data() !== undefined) {
           const data = document.data()?.followerList
-          setFollowerList(data)
           setFollowerCount(data.length)
+          if (data.includes(userId)) {
+            setIsFollwing(true)
+          }
         }
       })
 
-      onSnapshot(doc(db, 'followings', userId), (document) => {
+      onSnapshot(doc(db, 'followings', id), (document) => {
         if (document.data() !== undefined) {
           const data = document.data()?.followingList
-          setFollowingList(data)
           setFollowingCount(data.length)
         }
       })
-    } else {
-      getData()
     }
-  }, [userId])
+  }, [id, userId])
+
+  const FollowUnfollow = () => {
+    if (isFollowing) {
+      removeFromFollowerList()
+      removeFromFollowingList()
+    } else {
+      addToFollowerList()
+      addToFollowingList()
+    }
+  }
 
   return (
     <>
@@ -108,27 +177,24 @@ const ProfileInfoComponent = ({ setUserName }: any) => {
                 <Text style={styles.gridText}>Posts</Text>
               </View>
               <View style={[styles.gridItem, styles.horizontalDivider]}>
-                <Text style={styles.count}>
-                  {followerCount ? followerCount : 0}
-                </Text>
+                <Text style={styles.count}>{followerCount}</Text>
                 <Text style={styles.gridText}>Followers</Text>
               </View>
               <View style={styles.gridItem}>
-                <Text style={styles.count}>
-                  {followingCount ? followingCount : 0}
-                </Text>
+                <Text style={styles.count}>{followingCount}</Text>
                 <Text style={styles.gridText}>Following</Text>
               </View>
             </View>
-
-            {/* <Button
-              style={styles.followButton}
-              mode='contained'
-              onPress={() => console.log('Pressed')}
-              labelStyle={styles.followBtnLabel}
-            >
-              Follow
-            </Button> */}
+            {userId !== id && (
+              <Button
+                style={styles.followButton}
+                mode='contained'
+                onPress={() => FollowUnfollow()}
+                labelStyle={styles.followBtnLabel}
+              >
+                {isFollowing ? 'Following' : 'Follow'}
+              </Button>
+            )}
             <ToggleButton.Row
               style={styles.toggleButtonContainer}
               onValueChange={(value) => setMediaType(value)}
