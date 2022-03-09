@@ -30,6 +30,7 @@ import LinkingConfiguration from './LinkingConfiguration'
 import { auth } from '../Firebase/config'
 import EditProfileScreen from '../screens/MainScreens/EditProfileScreen'
 import OtherUserProfileScreen from '../screens/MainScreens/OtherUserProfileScreen'
+import CreatePostScreen from '../screens/MainScreens/CreatePostScreen'
 
 const Navigation = ({ colorScheme }: { colorScheme: ColorSchemeName }) => {
   const userInfo = auth.currentUser
@@ -200,28 +201,27 @@ const BottomTabNavigator = () => {
         }}
       />
       <BottomTab.Screen
-        name='ActionButton'
-        component={NotFoundScreen}
+        name='CreatePost'
+        component={CreatePostScreen}
         options={{
-          title: 'Chats',
           tabBarIcon: () => (
-            <TouchableOpacity
-              activeOpacity={1}
+            <View
               style={{
                 position: 'relative',
-                borderRadius: 50,
-                elevation: 10,
+                bottom: 15,
                 width: 60,
                 height: 60,
+                backgroundColor: Colors[colorScheme].tabActionButton,
+                borderRadius: 50,
                 justifyContent: 'center',
                 alignItems: 'center',
-                bottom: 15,
-                backgroundColor: Colors[colorScheme].tabActionButton,
+                elevation: 10,
               }}
             >
               <AntDesign size={30} name='plus' color='white' />
-            </TouchableOpacity>
+            </View>
           ),
+          headerShown: false,
         }}
       />
       <BottomTab.Screen

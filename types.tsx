@@ -37,6 +37,7 @@ export type RootTabParamList = {
   Chat: undefined
   Notification: undefined
   Profile: undefined
+  CreatePost: undefined
   ActionButton: undefined
 }
 

@@ -18,7 +18,7 @@ const ProfileInfoComponent = ({ setUserName }: any) => {
   const [followingList, setFollowingList] = useState([])
   const [followingCount, setFollowingCount] = useState(0)
 
-  const getData = async () => {
+  const getUserId = async () => {
     AsyncStorage.getItem('uid')
       .then((res) => {
         setUserId(res)
@@ -68,7 +68,7 @@ const ProfileInfoComponent = ({ setUserName }: any) => {
         }
       })
     } else {
-      getData()
+      getUserId()
     }
   }, [userId])
 
