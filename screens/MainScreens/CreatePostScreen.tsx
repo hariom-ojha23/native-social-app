@@ -7,6 +7,7 @@ import {
   Platform,
   Image,
 } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { RootStackScreenProps } from '../../types'
 import { View, Text } from '../../components/Themed'
 import {
@@ -20,6 +21,10 @@ import {
 import useColorScheme from '../../hooks/useColorScheme'
 import Colors from '../../constants/Colors'
 import { Ionicons } from '@expo/vector-icons'
+import uuid from 'react-native-uuid'
+import { db, storage } from '../../Firebase/config'
+import { collection, addDoc } from 'firebase/firestore'
+import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
 
 type Props = RootStackScreenProps<'MainStack'>
 
@@ -30,7 +35,14 @@ const CreatePostScreen = ({ navigation }: Props) => {
 
   const [remdescLength, setRemDescLength] = useState(0)
   const [description, setDescription] = useState<string>('')
-  const [imageArr, setImgArr] = useState<Array<string>>([])
+  const [rawImageArr, setRawImgArr] = useState<Array<string>>([])
+  const [imageArr, setImageArr] = useState<Array<string>>([])
+  const [authorInfo, setAuthorInfo] = useState({
+    uid: '',
+    displayName: '',
+    userName: '',
+    profilePhotoUrl: '',
+  })
   const [show, setShow] = useState<boolean>(false)
   const [message, setMessage] = useState<string>('')
 
@@ -45,9 +57,24 @@ const CreatePostScreen = ({ navigation }: Props) => {
       }
     }
 
+    const getUserData = async () => {
+      AsyncStorage.getItem('userData')
+        .then((res) => {
+          if (res !== null) {
+            const data = JSON.parse(res)
+            setAuthorInfo(data)
+          }
+        })
+        .catch((error) => {
+          console.log(error)
+        })
+    }
+
+    getUserData()
     getPermission()
   }, [])
 
+  // change description value and counter length
   const changeDescription = (value: string) => {
     if (value.length <= maxDescLen) {
       setDescription(value)
@@ -55,10 +82,18 @@ const CreatePostScreen = ({ navigation }: Props) => {
     }
   }
 
+  // handle snackbar closing
   const handleSnackClose = () => {
     setShow(false)
   }
 
+  // remove raw images
+  const removeImage = (uri: string) => {
+    const tempArr = rawImageArr.filter((x) => x !== uri)
+    setRawImgArr(tempArr)
+  }
+
+  // function to pick images from local storage
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
@@ -71,22 +106,89 @@ const CreatePostScreen = ({ navigation }: Props) => {
     console.log(result)
 
     if (!result.cancelled) {
-      setImgArr([...imageArr, result.uri])
+      setRawImgArr([...rawImageArr, result.uri])
     }
   }
 
-  const removeImage = (uri: string) => {
-    const tempArr = imageArr.filter((x) => x !== uri)
-    setImgArr(tempArr)
+  // upload photos to firebase storage
+  const uploadPhotoToStorage = async (uri: string) => {
+    return new Promise<void>(async (resolve) => {
+      try {
+        const response = await fetch(uri)
+        const imageBlob = await response.blob()
+
+        const storageRef = ref(
+          storage,
+          `user/${authorInfo.uid}/posts/${uuid.v4()}`
+        )
+        const uploadTask = uploadBytesResumable(storageRef, imageBlob)
+
+        uploadTask.on(
+          'state_changed',
+          (snapshot) => {
+            const progress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+            console.log('Upload is ' + progress.toFixed(2) + '% done')
+          },
+          (error) => {
+            const errMessage = error.code.split('/')[1]
+            setMessage(errMessage)
+            setShow(true)
+          },
+          async () => {
+            getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+              const temp = imageArr
+              temp.push(downloadURL)
+              setImageArr(temp)
+              resolve()
+            })
+          }
+        )
+      } catch (error) {
+        console.log(error)
+      }
+    })
   }
 
-  const createPost = () => {
-    if (description.length === 0 && imageArr.length === 0) {
+  const uploadAll = async () => {
+    for (let uri of rawImageArr) {
+      await uploadPhotoToStorage(uri)
+    }
+  }
+
+  // function to create posts
+  const createPost = async () => {
+    if (description.length === 0 && rawImageArr.length === 0) {
       setMessage('Either create a description or select atleast one image')
       setShow(true)
     } else {
-      console.log(description)
-      console.log(imageArr)
+      uploadAll()
+        .then(async () => {
+          const docData = {
+            author: {
+              uid: authorInfo.uid,
+              displayName: authorInfo.displayName,
+              userName: authorInfo.userName,
+              profilePhotoUrl: authorInfo.profilePhotoUrl,
+            },
+            comments: [],
+            images: imageArr,
+            description: description,
+            likes: [],
+            createdAt: new Date(),
+          }
+
+          await addDoc(collection(db, 'posts'), docData)
+            .then(() => {
+              setImageArr([])
+              setDescription('')
+              setRawImgArr([])
+              setMessage('post created successfully')
+              setShow(true)
+            })
+            .catch((error) => console.log(error))
+        })
+        .catch((error) => console.log(error))
     }
   }
 
@@ -117,7 +219,7 @@ const CreatePostScreen = ({ navigation }: Props) => {
           </Text>
         </Surface>
         <Surface style={styles.imagesWrapper}>
-          {imageArr.map((x, index) => (
+          {rawImageArr.map((x, index) => (
             <View style={{ position: 'relative', borderRadius: 10, margin: 8 }}>
               <Image
                 key={index}

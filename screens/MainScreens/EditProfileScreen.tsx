@@ -12,6 +12,7 @@ import { doc, updateDoc } from 'firebase/firestore'
 import * as ImagePicker from 'expo-image-picker'
 import { Avatar, IconButton, Snackbar, TextInput } from 'react-native-paper'
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import uuid from 'react-native-uuid'
 
 const EditProfileScreen = ({
   navigation,
@@ -92,7 +93,10 @@ const EditProfileScreen = ({
       const response = await fetch(uri)
       const imageBlob = await response.blob()
 
-      const storageRef = ref(storage, `users/${currentUser?.uid}/profilePhoto`)
+      const storageRef = ref(
+        storage,
+        `user/${currentUser?.uid}/profilePhoto/${uuid.v4()}`
+      )
       const uploadTask = uploadBytesResumable(storageRef, imageBlob)
 
       uploadTask.on(

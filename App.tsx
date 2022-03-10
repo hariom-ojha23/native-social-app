@@ -13,7 +13,7 @@ export default function App() {
   const isLoadingComplete = useCachedResources()
   const colorScheme = useColorScheme()
 
-  LogBox.ignoreAllLogs(true)
+  LogBox.ignoreLogs(['Setting a timer'])
 
   if (!isLoadingComplete) {
     return null

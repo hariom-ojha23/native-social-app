@@ -17,6 +17,7 @@ import { auth, db, storage } from '../../Firebase/config'
 import { collection, addDoc } from 'firebase/firestore'
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
 import { updateProfile } from '@firebase/auth'
+import uuid from 'react-native-uuid'
 
 const CompleteProfileScreen = ({
   navigation,
@@ -87,7 +88,10 @@ const CompleteProfileScreen = ({
       const response = await fetch(uri)
       const imageBlob = await response.blob()
 
-      const storageRef = ref(storage, `users/${currentUser?.uid}/profilePhoto`)
+      const storageRef = ref(
+        storage,
+        `user/${currentUser?.uid}/profilePhoto/${uuid.v4()}`
+      )
       const uploadTask = uploadBytesResumable(storageRef, imageBlob)
 
       uploadTask.on(
