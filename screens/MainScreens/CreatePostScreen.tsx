@@ -175,7 +175,7 @@ const CreatePostScreen = ({ navigation }: Props) => {
             images: imageArr,
             description: description,
             likes: [],
-            createdAt: new Date(),
+            createdAt: new Date().getTime(),
           }
 
           await addDoc(collection(db, 'posts'), docData)

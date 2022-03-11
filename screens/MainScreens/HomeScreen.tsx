@@ -1,41 +1,62 @@
 import React, { useState, useEffect } from 'react'
 import { StyleSheet, SafeAreaView, FlatList } from 'react-native'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 
-import { Text, View } from '../../components/Themed'
 import { RootTabScreenProps } from '../../types'
 import PostComponent from '../../components/HomeScreen/PostComponent'
-import { auth, db } from '../../Firebase/config'
-
-const posts = [
-  {
-    id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-    fullName: 'Aditya Shrivastav',
-    userName: '@chocolateBoy',
-    url: 'https://picsum.photos/700',
-  },
-  {
-    id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-    fullName: 'Hari om Ojha',
-    userName: '@harry',
-    url: 'https://picsum.photos/750',
-  },
-  {
-    id: '58694a0f-3da1-471f-bd96-145571e29d72',
-    fullName: 'Akash Sharma',
-    userName: '@panditJi',
-    url: 'https://picsum.photos/800',
-  },
-]
+import { db } from '../../Firebase/config'
+import { doc, onSnapshot, collection, query, where } from 'firebase/firestore'
 
 const HomeScreen = ({ navigation }: RootTabScreenProps<'Home'>) => {
   const [postList, setPostList] = useState([])
+  const [userId, setUserId] = useState<string | null>(null)
+
+  const getUserId = async () => {
+    AsyncStorage.getItem('uid')
+      .then((res) => {
+        setUserId(res)
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+  }
+
+  useEffect(() => {
+    if (userId !== null) {
+      const getPosts = async () => {
+        onSnapshot(doc(db, 'followings', userId), (document) => {
+          if (document.data() !== undefined) {
+            const data = document.data()?.followingList
+            const postsRef = collection(db, 'posts')
+            const temp: string[] = data
+            if (userId !== null) {
+              temp.push(userId)
+            }
+            const q = query(postsRef, where('author.uid', 'in', temp))
+
+            onSnapshot(q, (querySnapshot) => {
+              const array: any = []
+              querySnapshot.forEach((docs) => {
+                array.push(docs.data())
+              })
+              setPostList(array)
+            })
+          }
+        })
+      }
+
+      getPosts()
+    } else {
+      getUserId()
+    }
+  }, [userId])
 
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
         contentContainerStyle={styles.postList}
-        data={posts}
-        keyExtractor={(item) => item.id}
+        data={postList}
+        keyExtractor={(item, index) => index.toString()}
         renderItem={PostComponent}
         showsVerticalScrollIndicator={false}
       />

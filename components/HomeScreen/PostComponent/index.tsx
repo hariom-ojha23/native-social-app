@@ -23,10 +23,16 @@ const CardHeaderRightContent = () => (
 )
 
 interface PostDetail {
-  id: string
-  fullName: string
-  userName: string
-  url: string
+  author: {
+    displayName: string
+    userName: string
+    profilePhotoUrl: string
+  }
+  comments: Array<object>
+  createdAt: object
+  description: string
+  images: Array<string>
+  likes: Array<object>
 }
 
 const PostComponent = (props: { item: PostDetail }) => {
@@ -34,28 +40,28 @@ const PostComponent = (props: { item: PostDetail }) => {
   return (
     <Card style={styles.card}>
       <Card.Title
-        title={item.fullName}
+        title={item.author.displayName}
         titleStyle={styles.postTitle}
-        subtitle={item.userName}
+        subtitle={`@${item.author.userName}`}
         subtitleStyle={styles.postSubTitle}
-        left={() => CardHeaderLeftContent({ url: item.url })}
+        left={() => CardHeaderLeftContent({ url: item.author.profilePhotoUrl })}
         right={CardHeaderRightContent}
       />
       <View style={styles.contentContainer}>
-        <Image style={styles.image} source={{ uri: `${item.url}` }} />
+        <Image style={styles.image} source={{ uri: `${item.images[0]}` }} />
         <BlurView intensity={80} tint='dark' style={styles.actionContainer}>
           <Card.Actions>
             <View style={styles.actionInnerContainer}>
               <Pressable>
                 <AntDesign name='heart' size={22} color='red' />
               </Pressable>
-              <Text style={styles.actionInfotext}>12T</Text>
+              <Text style={styles.actionInfotext}>{item.likes.length}</Text>
             </View>
             <View style={styles.actionInnerContainer}>
               <Pressable>
                 <Ionicons name='chatbubble-sharp' size={22} color='#d3d3d3' />
               </Pressable>
-              <Text style={styles.actionInfotext}>7B</Text>
+              <Text style={styles.actionInfotext}>{item.comments.length}</Text>
             </View>
             <View style={styles.actionInnerContainer}>
               <Pressable>
