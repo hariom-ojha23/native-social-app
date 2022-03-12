@@ -37,7 +37,9 @@ const HomeScreen = ({ navigation }: RootTabScreenProps<'Home'>) => {
             onSnapshot(q, (querySnapshot) => {
               const array: any = []
               querySnapshot.forEach((docs) => {
-                array.push(docs.data())
+                const obj = docs.data()
+                obj['id'] = docs.id
+                array.push(obj)
               })
               setPostList(array)
             })
@@ -53,13 +55,17 @@ const HomeScreen = ({ navigation }: RootTabScreenProps<'Home'>) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <FlatList
-        contentContainerStyle={styles.postList}
-        data={postList}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={PostComponent}
-        showsVerticalScrollIndicator={false}
-      />
+      {userId !== null && (
+        <FlatList
+          contentContainerStyle={styles.postList}
+          data={postList}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item }) => (
+            <PostComponent item={item} userId={userId} />
+          )}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
     </SafeAreaView>
   )
 }

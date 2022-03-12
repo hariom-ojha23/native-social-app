@@ -7,7 +7,7 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingTop: 0,
         marginVertical: 10,
-        elevation: 0
+        elevation: 5
     },
     contentContainer: {
         position: 'relative',
@@ -38,6 +38,14 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         marginRight: 10
+    },
+    heart: {
+        height: 60,
+        width: 60,
+        marginRight: -25,
+        marginLeft: -10,
+        marginTop: -10,
+        marginBottom: -30,
     },
     actionInfotext: {
         marginHorizontal: 5,
