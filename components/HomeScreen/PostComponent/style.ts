@@ -25,12 +25,10 @@ const styles = StyleSheet.create({
     },
     actionContainer: {
         width: '100%',
-        paddingVertical: 5,
         position: 'absolute',
         bottom: 0,
         borderBottomLeftRadius: 15,
         borderBottomRightRadius: 15,
-        paddingLeft: 15,
         zIndex: 1,
     },
     actionInnerContainer: {

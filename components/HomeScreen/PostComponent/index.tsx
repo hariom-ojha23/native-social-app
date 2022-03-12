@@ -1,19 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { View, Image, Pressable } from 'react-native'
-import { Avatar, Card } from 'react-native-paper'
+import { View, Image, Pressable, Modal } from 'react-native'
+import { Avatar, Card, IconButton } from 'react-native-paper'
 import { Ionicons, Feather } from '@expo/vector-icons'
 import { BlurView } from 'expo-blur'
 import { Text } from '../../Themed'
 import styles from './style'
 import LottieView from 'lottie-react-native'
 import { db } from '../../../Firebase/config'
-import {
-  arrayRemove,
-  arrayUnion,
-  doc,
-  onSnapshot,
-  updateDoc,
-} from 'firebase/firestore'
+import { arrayRemove, arrayUnion, doc, updateDoc } from 'firebase/firestore'
+import CommentModal from '../CommentModal'
 
 const CardHeaderLeftContent = (props: any) => (
   <Avatar.Image size={40} source={{ uri: `${props.url}` }} />
@@ -27,7 +22,7 @@ const CardHeaderRightContent = () => (
     })}
     onPress={() => console.log('pressed')}
   >
-    <Feather name='more-vertical' size={24} />
+    <Feather name='more-vertical' size={24} color='#d3d3d3' />
   </Pressable>
 )
 
@@ -37,7 +32,6 @@ type PostDetail = {
     userName: string
     profilePhotoUrl: string
   }
-  comments: Array<object>
   createdAt: object
   description: string
   images: Array<string>
@@ -53,12 +47,16 @@ const PostComponent = (props: { item: PostDetail; userId: Id }) => {
 
   const animation = useRef<any>(null)
   const [isLiked, setIsLiked] = useState(false)
+  const [likeCount, setLikeCount] = useState(0)
+  const [commentModal, setCommentModal] = useState(false)
 
   useEffect(() => {
     if (item.likes.includes(userId)) {
       setIsLiked(true)
+      setLikeCount(item.likes.length)
     } else {
       setIsLiked(false)
+      setLikeCount(item.likes.length)
     }
   }, [item.likes])
 
@@ -66,7 +64,7 @@ const PostComponent = (props: { item: PostDetail; userId: Id }) => {
     if (isLiked) {
       animation.current.play(20, 50)
     } else {
-      animation.current.play(0, 19)
+      animation.current.play(0, 15)
     }
   }, [isLiked])
 
@@ -75,24 +73,16 @@ const PostComponent = (props: { item: PostDetail; userId: Id }) => {
       const postRef = doc(db, 'posts', item.id)
       await updateDoc(postRef, {
         likes: arrayRemove(userId),
+      }).catch((error) => {
+        console.log(error)
       })
-        .then(() => {
-          setIsLiked(false)
-        })
-        .catch((error) => {
-          console.log(error)
-        })
     } else {
       const postRef = doc(db, 'posts', item.id)
       await updateDoc(postRef, {
         likes: arrayUnion(userId),
+      }).catch((error) => {
+        console.log(error)
       })
-        .then(() => {
-          setIsLiked(true)
-        })
-        .catch((error) => {
-          console.log(error)
-        })
     }
   }
 
@@ -110,41 +100,44 @@ const PostComponent = (props: { item: PostDetail; userId: Id }) => {
         <Image style={styles.image} source={{ uri: `${item.images[0]}` }} />
         <BlurView intensity={80} tint='dark' style={styles.actionContainer}>
           <Card.Actions>
+            <Pressable
+              style={[styles.actionInnerContainer, { paddingLeft: 10 }]}
+              onPress={() => likeOrUnlike()}
+            >
+              <LottieView
+                ref={animation}
+                style={styles.heart}
+                source={require('../../../assets/lottie/like.json')}
+                autoPlay={false}
+                loop={false}
+              />
+              <Text style={styles.actionInfotext}>{likeCount}</Text>
+            </Pressable>
             <View style={styles.actionInnerContainer}>
-              <Pressable onPress={() => likeOrUnlike()}>
-                <LottieView
-                  ref={animation}
-                  style={styles.heart}
-                  source={require('../../../assets/lottie/like.json')}
-                  autoPlay={false}
-                  loop={false}
-                />
-              </Pressable>
-              <Text style={styles.actionInfotext}>{item.likes.length}</Text>
+              <IconButton
+                style={{ padding: 0, margin: 0 }}
+                icon={() => (
+                  <Ionicons name='chatbubble-sharp' size={22} color='#d3d3d3' />
+                )}
+                size={20}
+                onPress={() => setCommentModal(true)}
+              />
             </View>
             <View style={styles.actionInnerContainer}>
-              <Pressable>
-                <Ionicons name='chatbubble-sharp' size={22} color='#d3d3d3' />
-              </Pressable>
-              <Text style={styles.actionInfotext}>{item.comments.length}</Text>
-            </View>
-            <View style={styles.actionInnerContainer}>
-              <Pressable>
-                <Ionicons name='send' size={22} color='#d3d3d3' />
-              </Pressable>
+              <IconButton
+                style={{ padding: 0, margin: 0 }}
+                icon={() => <Ionicons name='send' size={22} color='#d3d3d3' />}
+                size={20}
+                onPress={() => setCommentModal(true)}
+              />
             </View>
           </Card.Actions>
         </BlurView>
       </View>
-      {/* {userId !== undefined && item.likes.includes(userId) ? (
-                  <Ionicons name='ios-heart' size={25} color='#d3d3d3' />
-                ) : (
-                  <Ionicons
-                    name='ios-heart-outline'
-                    size={25}
-                    color='#d3d3d3'
-                  />
-                )} */}
+      <CommentModal
+        commentModal={commentModal}
+        setCommentModal={setCommentModal}
+      />
     </Card>
   )
 }

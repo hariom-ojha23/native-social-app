@@ -5,7 +5,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 import { RootTabScreenProps } from '../../types'
 import PostComponent from '../../components/HomeScreen/PostComponent'
 import { db } from '../../Firebase/config'
-import { doc, onSnapshot, collection, query, where } from 'firebase/firestore'
+import {
+  doc,
+  onSnapshot,
+  collection,
+  query,
+  where,
+  limit,
+} from 'firebase/firestore'
 
 const HomeScreen = ({ navigation }: RootTabScreenProps<'Home'>) => {
   const [postList, setPostList] = useState([])
@@ -32,7 +39,11 @@ const HomeScreen = ({ navigation }: RootTabScreenProps<'Home'>) => {
             if (userId !== null) {
               temp.push(userId)
             }
-            const q = query(postsRef, where('author.uid', 'in', temp))
+            const q = query(
+              postsRef,
+              where('author.uid', 'in', temp),
+              limit(50)
+            )
 
             onSnapshot(q, (querySnapshot) => {
               const array: any = []

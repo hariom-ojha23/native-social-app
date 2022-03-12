@@ -90,11 +90,11 @@ const SearchScreen = ({ navigation }: Props) => {
           }}
         />
         <Searchbar
-          autoFocus={true}
           style={[styles.searchBar, { backgroundColor: colors.background }]}
           placeholder='Search User'
           onChangeText={onChangeSearch}
           value={searchQuery}
+          autoFocus
         />
       </Appbar.Header>
 

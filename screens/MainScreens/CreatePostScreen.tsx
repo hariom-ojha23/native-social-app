@@ -183,6 +183,7 @@ const CreatePostScreen = ({ navigation }: Props) => {
               setImageArr([])
               setDescription('')
               setRawImgArr([])
+              setRemDescLength(maxDescLen)
               setMessage('post created successfully')
               setShow(true)
             })
