@@ -92,13 +92,23 @@ const ProfileInfoComponent = ({ setUserName, id }: any) => {
       })
   }
 
+  const FollowUnfollow = () => {
+    if (isFollowing) {
+      removeFromFollowerList()
+      removeFromFollowingList()
+    } else {
+      addToFollowerList()
+      addToFollowingList()
+    }
+  }
+
   useEffect(() => {
     getData()
   }, [])
 
   useEffect(() => {
     if (id !== null && id !== '' && id !== undefined) {
-      onSnapshot(doc(db, 'users', id), (snap) => {
+      return onSnapshot(doc(db, 'users', id), (snap) => {
         if (snap.data() !== undefined) {
           const data = snap.data()
           setBio(data?.bio)
@@ -112,7 +122,7 @@ const ProfileInfoComponent = ({ setUserName, id }: any) => {
 
   useEffect(() => {
     if (id !== null && id !== '' && id !== undefined) {
-      onSnapshot(doc(db, 'followers', id), (document) => {
+      return onSnapshot(doc(db, 'followers', id), (document) => {
         if (document.data() !== undefined) {
           const data = document.data()?.followerList
           setFollowerCount(data.length)
@@ -121,8 +131,12 @@ const ProfileInfoComponent = ({ setUserName, id }: any) => {
           }
         }
       })
+    }
+  }, [id, userId])
 
-      onSnapshot(doc(db, 'followings', id), (document) => {
+  useEffect(() => {
+    if (id !== null && id !== '' && id !== undefined) {
+      return onSnapshot(doc(db, 'followings', id), (document) => {
         if (document.data() !== undefined) {
           const data = document.data()?.followingList
           setFollowingCount(data.length)
@@ -130,16 +144,6 @@ const ProfileInfoComponent = ({ setUserName, id }: any) => {
       })
     }
   }, [id, userId])
-
-  const FollowUnfollow = () => {
-    if (isFollowing) {
-      removeFromFollowerList()
-      removeFromFollowingList()
-    } else {
-      addToFollowerList()
-      addToFollowingList()
-    }
-  }
 
   return (
     <>

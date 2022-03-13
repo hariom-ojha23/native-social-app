@@ -11,7 +11,7 @@ import { arrayRemove, arrayUnion, doc, updateDoc } from 'firebase/firestore'
 import CommentModal from '../CommentModal'
 
 const CardHeaderLeftContent = (props: any) => (
-  <Avatar.Image size={40} source={{ uri: `${props.url}` }} />
+  <Avatar.Image size={45} source={{ uri: `${props.url}` }} />
 )
 
 const CardHeaderRightContent = () => (
@@ -46,6 +46,8 @@ const PostComponent = (props: { item: PostDetail; userId: Id }) => {
   const { userId } = props
 
   const animation = useRef<any>(null)
+  const isFirstRun = useRef<any>(true)
+
   const [isLiked, setIsLiked] = useState(false)
   const [likeCount, setLikeCount] = useState(0)
   const [commentModal, setCommentModal] = useState(false)
@@ -61,10 +63,17 @@ const PostComponent = (props: { item: PostDetail; userId: Id }) => {
   }, [item.likes])
 
   useEffect(() => {
-    if (isLiked) {
+    if (isFirstRun.current) {
+      if (isLiked) {
+        animation.current.play(66, 66)
+      } else {
+        animation.current.play(19, 19)
+      }
+      isFirstRun.current = false
+    } else if (isLiked) {
       animation.current.play(20, 50)
     } else {
-      animation.current.play(0, 15)
+      animation.current.play(0, 19)
     }
   }, [isLiked])
 
@@ -137,6 +146,7 @@ const PostComponent = (props: { item: PostDetail; userId: Id }) => {
       <CommentModal
         commentModal={commentModal}
         setCommentModal={setCommentModal}
+        id={item.id}
       />
     </Card>
   )

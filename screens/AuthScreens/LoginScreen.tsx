@@ -7,12 +7,17 @@ import { RootStackScreenProps } from '../../types'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { auth } from '../../Firebase/config'
+import Colors from '../../constants/Colors'
+import useColorScheme from '../../hooks/useColorScheme'
 
 const LoginScreen = ({ navigation }: RootStackScreenProps<'Login'>) => {
   const [email, setEmail] = useState<string>('')
   const [password, setPassword] = useState<string>('')
   const [show, setShow] = useState<boolean>(false)
   const [message, setMessage] = useState<string | null>(null)
+
+  const colorScheme = useColorScheme()
+  const colors = Colors[colorScheme]
 
   const emailRegex =
     /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
@@ -71,7 +76,7 @@ const LoginScreen = ({ navigation }: RootStackScreenProps<'Login'>) => {
           </>
         )}
       </View>
-      <View style={styles.upperView}>
+      <View style={[styles.upperView, { backgroundColor: colors.background }]}>
         <Text style={styles.login}>Login</Text>
         <View style={styles.inputContainer}>
           <TextInput

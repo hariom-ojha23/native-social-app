@@ -32,25 +32,25 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     inputBox: {
-        paddingVertical: 10,
-        paddingRight: 12,
+        paddingVertical: 8,
         width: '100%',
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'center'
+        alignItems: 'center',
     },
     input: {
         fontSize: 18,
         width: '68%',
     },
     sendButton: {
-        width: '10%',
+        width: '15%',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
         margin: 0,
-        padding: 0
+        padding: 0,
+        height: 50,
 
     }
 })

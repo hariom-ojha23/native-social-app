@@ -28,39 +28,58 @@ const HomeScreen = ({ navigation }: RootTabScreenProps<'Home'>) => {
       })
   }
 
+  const addData = async (data: any) => {
+    try {
+      await AsyncStorage.setItem('userData', JSON.stringify(data))
+        .then(() => console.log('Data Added'))
+        .catch((error) => console.log(error))
+    } catch (e) {
+      console.log(e)
+    }
+  }
+
   useEffect(() => {
     if (userId !== null) {
-      const getPosts = async () => {
-        onSnapshot(doc(db, 'followings', userId), (document) => {
-          if (document.data() !== undefined) {
-            const data = document.data()?.followingList
-            const postsRef = collection(db, 'posts')
-            const temp: string[] = data
-            if (userId !== null) {
-              temp.push(userId)
-            }
-            const q = query(
-              postsRef,
-              where('author.uid', 'in', temp),
-              limit(50)
-            )
-
-            onSnapshot(q, (querySnapshot) => {
-              const array: any = []
-              querySnapshot.forEach((docs) => {
-                const obj = docs.data()
-                obj['id'] = docs.id
-                array.push(obj)
-              })
-              setPostList(array)
-            })
+      return onSnapshot(doc(db, 'followings', userId), (document) => {
+        if (document.data() !== undefined) {
+          const data = document.data()?.followingList
+          const postsRef = collection(db, 'posts')
+          const temp: string[] = data
+          if (userId !== null) {
+            temp.push(userId)
           }
-        })
-      }
+          const q = query(
+            postsRef,
+            //orderBy('createdAt', 'desc'),
+            where('author.uid', 'in', temp),
+            limit(50)
+          )
 
-      getPosts()
+          return onSnapshot(q, (querySnapshot) => {
+            const array: any = []
+            querySnapshot.forEach((docs) => {
+              const obj = docs.data()
+              obj['id'] = docs.id
+              array.push(obj)
+            })
+            setPostList(array)
+          })
+        }
+      })
     } else {
       getUserId()
+    }
+  }, [userId])
+
+  useEffect(() => {
+    if (userId !== null) {
+      return onSnapshot(doc(db, 'users', userId), (snap) => {
+        if (snap.data() !== undefined) {
+          const data = snap.data()
+
+          addData(data)
+        }
+      })
     }
   }, [userId])
 
@@ -70,7 +89,7 @@ const HomeScreen = ({ navigation }: RootTabScreenProps<'Home'>) => {
         <FlatList
           contentContainerStyle={styles.postList}
           data={postList}
-          keyExtractor={(item, index) => index.toString()}
+          keyExtractor={(_, index) => index.toString()}
           renderItem={({ item }) => (
             <PostComponent item={item} userId={userId} />
           )}

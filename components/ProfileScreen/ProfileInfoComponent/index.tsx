@@ -18,16 +18,6 @@ const ProfileInfoComponent = ({ setUserName }: any) => {
   const [followingList, setFollowingList] = useState([])
   const [followingCount, setFollowingCount] = useState(0)
 
-  const getUserId = async () => {
-    AsyncStorage.getItem('uid')
-      .then((res) => {
-        setUserId(res)
-      })
-      .catch((error) => {
-        console.log(error)
-      })
-  }
-
   const addData = async (data: any) => {
     try {
       await AsyncStorage.setItem('userData', JSON.stringify(data))
@@ -39,9 +29,22 @@ const ProfileInfoComponent = ({ setUserName }: any) => {
   }
 
   useEffect(() => {
+    const getUserId = async () => {
+      AsyncStorage.getItem('uid')
+        .then((res) => {
+          setUserId(res)
+        })
+        .catch((error) => {
+          console.log(error)
+        })
+    }
+
+    getUserId()
+  }, [])
+
+  useEffect(() => {
     if (userId !== null) {
-      console.log(userId)
-      onSnapshot(doc(db, 'users', userId), (snap) => {
+      return onSnapshot(doc(db, 'users', userId), (snap) => {
         if (snap.data() !== undefined) {
           const data = snap.data()
           setBio(data?.bio)
@@ -51,24 +54,30 @@ const ProfileInfoComponent = ({ setUserName }: any) => {
           addData(data)
         }
       })
+    }
+  }, [userId])
 
-      onSnapshot(doc(db, 'followers', userId), (document) => {
+  useEffect(() => {
+    if (userId !== null) {
+      return onSnapshot(doc(db, 'followers', userId), (document) => {
         if (document.data() !== undefined) {
           const data = document.data()?.followerList
           setFollowerList(data)
           setFollowerCount(data.length)
         }
       })
+    }
+  }, [userId])
 
-      onSnapshot(doc(db, 'followings', userId), (document) => {
+  useEffect(() => {
+    if (userId !== null) {
+      return onSnapshot(doc(db, 'followings', userId), (document) => {
         if (document.data() !== undefined) {
           const data = document.data()?.followingList
           setFollowingList(data)
           setFollowingCount(data.length)
         }
       })
-    } else {
-      getUserId()
     }
   }, [userId])
 

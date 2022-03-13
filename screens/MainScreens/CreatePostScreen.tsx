@@ -23,7 +23,7 @@ import Colors from '../../constants/Colors'
 import { Ionicons } from '@expo/vector-icons'
 import uuid from 'react-native-uuid'
 import { db, storage } from '../../Firebase/config'
-import { collection, addDoc } from 'firebase/firestore'
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 import { ref, uploadBytesResumable, getDownloadURL } from 'firebase/storage'
 
 type Props = RootStackScreenProps<'MainStack'>
@@ -171,11 +171,10 @@ const CreatePostScreen = ({ navigation }: Props) => {
               userName: authorInfo.userName,
               profilePhotoUrl: authorInfo.profilePhotoUrl,
             },
-            comments: [],
             images: imageArr,
             description: description,
             likes: [],
-            createdAt: new Date().getTime(),
+            createdAt: serverTimestamp(),
           }
 
           await addDoc(collection(db, 'posts'), docData)

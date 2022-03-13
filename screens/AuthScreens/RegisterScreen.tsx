@@ -6,6 +6,8 @@ import { useKeyboard } from '../../hooks/useKeyboard'
 import { RootStackScreenProps } from '../../types'
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { auth } from '../../Firebase/config'
+import Colors from '../../constants/Colors'
+import useColorScheme from '../../hooks/useColorScheme'
 
 const RegisterScreen = ({ navigation }: RootStackScreenProps<'Register'>) => {
   const [displayName, setDisplayName] = useState<string>('')
@@ -15,6 +17,8 @@ const RegisterScreen = ({ navigation }: RootStackScreenProps<'Register'>) => {
   const [message, setMessage] = useState<string | null>(null)
 
   const isKeyBoardOpen = useKeyboard()
+  const colorScheme = useColorScheme()
+  const colors = Colors[colorScheme]
 
   const emailRegex =
     /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
@@ -66,7 +70,7 @@ const RegisterScreen = ({ navigation }: RootStackScreenProps<'Register'>) => {
           </>
         )}
       </View>
-      <View style={styles.upperView}>
+      <View style={(styles.upperView, { backgroundColor: colors.background })}>
         <Text style={styles.login}>Register</Text>
         <View style={styles.inputContainer}>
           <TextInput
