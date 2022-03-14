@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   postList: {
-    marginBottom: 75,
+    marginBottom: 60,
   },
   columnWrapperStyle: {
     flex: 1,

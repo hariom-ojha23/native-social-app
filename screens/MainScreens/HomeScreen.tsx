@@ -103,7 +103,8 @@ const HomeScreen = ({ navigation }: RootTabScreenProps<'Home'>) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    marginBottom: 75,
+    //marginBottom: 75,
+    marginBottom: 50,
   },
   postList: {
     padding: 15,

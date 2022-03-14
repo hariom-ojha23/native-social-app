@@ -142,11 +142,11 @@ const BottomTabNavigator = () => {
         tabBarActiveTintColor: Colors[colorScheme].tint,
         tabBarStyle: {
           height: 60,
-          bottom: 15,
-          left: 15,
-          right: 15,
+          // bottom: 15,
+          // left: 15,
+          // right: 15,
           position: 'absolute',
-          borderRadius: 15,
+          //borderRadius: 15,
         },
       }}
     >
@@ -155,7 +155,9 @@ const BottomTabNavigator = () => {
         component={HomeScreen}
         options={({ navigation }: RootTabScreenProps<'Home'>) => ({
           title: 'Felix',
-          tabBarIcon: ({ color }) => <IonIconIcon name='grid' color={color} />,
+          tabBarIcon: (tabinfo) => (
+            <Ionicons name='grid' size={24} color={tabinfo.color} />
+          ),
           headerStyle: {
             elevation: 0,
           },
@@ -195,8 +197,8 @@ const BottomTabNavigator = () => {
         component={ChatScreen}
         options={{
           title: 'Chats',
-          tabBarIcon: ({ color }) => (
-            <IonIconIcon name='chatbubble-sharp' color={color} />
+          tabBarIcon: (tabinfo) => (
+            <Ionicons name='chatbubble-sharp' size={24} color={tabinfo.color} />
           ),
         }}
       />
@@ -204,7 +206,7 @@ const BottomTabNavigator = () => {
         name='CreatePost'
         component={CreatePostScreen}
         options={{
-          tabBarIcon: () => (
+          tabBarIcon: (tabinfo) => (
             <View
               style={{
                 position: 'relative',

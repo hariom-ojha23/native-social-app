@@ -1,40 +1,56 @@
-import React, { useState, useRef, useEffect } from 'react'
-import { View, Image, Pressable, Modal } from 'react-native'
-import { Avatar, Card, IconButton } from 'react-native-paper'
-import { Ionicons, Feather } from '@expo/vector-icons'
+import React, { useState, useRef, useEffect, Dispatch } from 'react'
+import { View, Image, Pressable } from 'react-native'
+import { Avatar, Card, Divider, IconButton, Menu } from 'react-native-paper'
+import { Ionicons, Feather, MaterialIcons } from '@expo/vector-icons'
 import { BlurView } from 'expo-blur'
 import { Text } from '../../Themed'
 import styles from './style'
 import LottieView from 'lottie-react-native'
-import { db } from '../../../Firebase/config'
-import { arrayRemove, arrayUnion, doc, updateDoc } from 'firebase/firestore'
+import { db, storage } from '../../../Firebase/config'
+import {
+  arrayRemove,
+  arrayUnion,
+  doc,
+  updateDoc,
+  deleteDoc,
+} from 'firebase/firestore'
 import CommentModal from '../CommentModal'
+import { deleteObject, ref } from 'firebase/storage'
 
 const CardHeaderLeftContent = (props: any) => (
   <Avatar.Image size={45} source={{ uri: `${props.url}` }} />
 )
 
-const CardHeaderRightContent = () => (
-  <Pressable
-    style={({ pressed }) => ({
-      opacity: pressed ? 0.5 : 1,
-      marginRight: 5,
-    })}
-    onPress={() => console.log('pressed')}
-  >
-    <Feather name='more-vertical' size={24} color='#d3d3d3' />
-  </Pressable>
-)
+const CardHeaderRightContent = (props: { setOpen: Dispatch<boolean> }) => {
+  const { setOpen } = props
+  return (
+    <Pressable
+      style={({ pressed }) => ({
+        opacity: pressed ? 0.5 : 1,
+        marginRight: 5,
+      })}
+      onPress={() => setOpen(true)}
+    >
+      <Feather name='more-vertical' size={24} color='gray' />
+    </Pressable>
+  )
+}
 
 type PostDetail = {
   author: {
+    uid: string
     displayName: string
     userName: string
     profilePhotoUrl: string
   }
   createdAt: object
   description: string
-  images: Array<string>
+  images: [
+    {
+      url: string
+      id: string
+    }
+  ]
   likes: Array<string>
   id: string
 }
@@ -51,6 +67,7 @@ const PostComponent = (props: { item: PostDetail; userId: Id }) => {
   const [isLiked, setIsLiked] = useState(false)
   const [likeCount, setLikeCount] = useState(0)
   const [commentModal, setCommentModal] = useState(false)
+  const [openMenu, setOpenMenu] = useState(false)
 
   useEffect(() => {
     if (item.likes.includes(userId)) {
@@ -95,6 +112,25 @@ const PostComponent = (props: { item: PostDetail; userId: Id }) => {
     }
   }
 
+  const deletePost = async () => {
+    await deleteDoc(doc(db, 'posts', item.id))
+      .then(() => {
+        item.images.forEach((x) => {
+          const imgRef = ref(storage, `user/${userId}/posts/${x.id}`)
+
+          deleteObject(imgRef)
+            .then(() => {
+              console.log('Image deleted successfully')
+            })
+            .catch((error) => console.log(error))
+        })
+      })
+      .then(() => {
+        console.log('Post Deleted Successfully')
+      })
+      .catch((error) => console.log(error))
+  }
+
   return (
     <Card style={styles.card}>
       <Card.Title
@@ -103,10 +139,44 @@ const PostComponent = (props: { item: PostDetail; userId: Id }) => {
         subtitle={`@${item.author.userName}`}
         subtitleStyle={styles.postSubTitle}
         left={() => CardHeaderLeftContent({ url: item.author.profilePhotoUrl })}
-        right={CardHeaderRightContent}
+        right={() => (
+          <Menu
+            visible={openMenu}
+            onDismiss={() => setOpenMenu(false)}
+            anchor={<CardHeaderRightContent setOpen={setOpenMenu} />}
+          >
+            <Menu.Item
+              icon={() => (
+                <Ionicons
+                  name='md-bookmark-outline'
+                  size={22}
+                  color='#007bff'
+                />
+              )}
+              title='Save Post'
+            />
+            {userId === item.author.uid && (
+              <>
+                <Divider />
+                <Menu.Item
+                  icon={() => (
+                    <MaterialIcons
+                      name='delete-outline'
+                      size={24}
+                      color='#e3242b'
+                    />
+                  )}
+                  title='Delete Post'
+                  onPress={() => deletePost()}
+                />
+              </>
+            )}
+          </Menu>
+        )}
       />
+
       <View style={styles.contentContainer}>
-        <Image style={styles.image} source={{ uri: `${item.images[0]}` }} />
+        <Image style={styles.image} source={{ uri: `${item.images[0].url}` }} />
         <BlurView intensity={80} tint='dark' style={styles.actionContainer}>
           <Card.Actions>
             <Pressable

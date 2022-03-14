@@ -48,6 +48,10 @@ const CommentComponent = (props: { item: Comment }) => {
         return 'few sec'
       case 'a minute ago':
         return '1m'
+      case 'an hour ago':
+        return '1h'
+      case 'a day ago':
+        return '1day'
       default:
         const first = str.split(' ')[0]
         let mid = str.split(' ')[1]

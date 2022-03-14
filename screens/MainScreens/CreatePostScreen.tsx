@@ -36,7 +36,7 @@ const CreatePostScreen = ({ navigation }: Props) => {
   const [remdescLength, setRemDescLength] = useState(0)
   const [description, setDescription] = useState<string>('')
   const [rawImageArr, setRawImgArr] = useState<Array<string>>([])
-  const [imageArr, setImageArr] = useState<Array<string>>([])
+  const [imageArr, setImageArr] = useState<Array<object>>([])
   const [authorInfo, setAuthorInfo] = useState({
     uid: '',
     displayName: '',
@@ -116,11 +116,9 @@ const CreatePostScreen = ({ navigation }: Props) => {
       try {
         const response = await fetch(uri)
         const imageBlob = await response.blob()
+        const imgId = uuid.v4()
 
-        const storageRef = ref(
-          storage,
-          `user/${authorInfo.uid}/posts/${uuid.v4()}`
-        )
+        const storageRef = ref(storage, `user/${authorInfo.uid}/posts/${imgId}`)
         const uploadTask = uploadBytesResumable(storageRef, imageBlob)
 
         uploadTask.on(
@@ -138,7 +136,11 @@ const CreatePostScreen = ({ navigation }: Props) => {
           async () => {
             getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
               const temp = imageArr
-              temp.push(downloadURL)
+              const obj = {
+                url: downloadURL,
+                id: imgId,
+              }
+              temp.push(obj)
               setImageArr(temp)
               resolve()
             })
