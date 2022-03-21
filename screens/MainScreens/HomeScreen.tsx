@@ -12,11 +12,14 @@ import {
   query,
   where,
   limit,
+  DocumentData,
 } from 'firebase/firestore'
 
 const HomeScreen = ({ navigation }: RootTabScreenProps<'Home'>) => {
   const [postList, setPostList] = useState([])
   const [userId, setUserId] = useState<string | null>(null)
+  const [show, setShow] = useState<boolean>(false)
+  const [message, setMessage] = useState<string | null>(null)
 
   const getUserId = async () => {
     AsyncStorage.getItem('uid')
@@ -28,7 +31,7 @@ const HomeScreen = ({ navigation }: RootTabScreenProps<'Home'>) => {
       })
   }
 
-  const addData = async (data: any) => {
+  const addData = async (data: DocumentData) => {
     try {
       await AsyncStorage.setItem('userData', JSON.stringify(data))
         .then(() => console.log('Data Added'))
@@ -37,6 +40,8 @@ const HomeScreen = ({ navigation }: RootTabScreenProps<'Home'>) => {
       console.log(e)
     }
   }
+
+  const addSavedPosts = async (data: DocumentData) => {}
 
   useEffect(() => {
     if (userId !== null) {
@@ -76,8 +81,23 @@ const HomeScreen = ({ navigation }: RootTabScreenProps<'Home'>) => {
       return onSnapshot(doc(db, 'users', userId), (snap) => {
         if (snap.data() !== undefined) {
           const data = snap.data()
+          if (data !== undefined) {
+            addData(data)
+          }
+        }
+      })
+    }
+  }, [userId])
 
-          addData(data)
+  useEffect(() => {
+    if (userId !== null) {
+      return onSnapshot(doc(db, 'savedPosts', userId), (snap) => {
+        if (snap.data() !== undefined) {
+          const data = snap.data()
+          console.log(data)
+          if (data !== undefined) {
+            addSavedPosts(data)
+          }
         }
       })
     }
@@ -91,7 +111,14 @@ const HomeScreen = ({ navigation }: RootTabScreenProps<'Home'>) => {
           data={postList}
           keyExtractor={(_, index) => index.toString()}
           renderItem={({ item }) => (
-            <PostComponent item={item} userId={userId} />
+            <PostComponent
+              item={item}
+              userId={userId}
+              show={show}
+              setShow={setShow}
+              message={message}
+              setMessage={setMessage}
+            />
           )}
           showsVerticalScrollIndicator={false}
         />

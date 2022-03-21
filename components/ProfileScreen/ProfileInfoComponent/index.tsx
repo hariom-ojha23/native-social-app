@@ -62,8 +62,10 @@ const ProfileInfoComponent = ({ setUserName }: any) => {
       return onSnapshot(doc(db, 'followers', userId), (document) => {
         if (document.data() !== undefined) {
           const data = document.data()?.followerList
-          setFollowerList(data)
-          setFollowerCount(data.length)
+          if (data !== undefined) {
+            setFollowerList(data)
+            setFollowerCount(data.length)
+          }
         }
       })
     }
@@ -74,8 +76,10 @@ const ProfileInfoComponent = ({ setUserName }: any) => {
       return onSnapshot(doc(db, 'followings', userId), (document) => {
         if (document.data() !== undefined) {
           const data = document.data()?.followingList
-          setFollowingList(data)
-          setFollowingCount(data.length)
+          if (data !== undefined) {
+            setFollowingList(data)
+            setFollowingCount(data.length)
+          }
         }
       })
     }

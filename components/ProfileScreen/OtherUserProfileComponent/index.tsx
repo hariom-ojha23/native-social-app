@@ -10,6 +10,7 @@ import {
   arrayUnion,
   doc,
   onSnapshot,
+  setDoc,
   updateDoc,
 } from 'firebase/firestore'
 
@@ -67,9 +68,13 @@ const ProfileInfoComponent = ({ setUserName, id }: any) => {
   const addToFollowerList = async () => {
     const followerRef = doc(db, 'followers', id)
 
-    await updateDoc(followerRef, {
-      followerList: arrayUnion(userId),
-    })
+    await setDoc(
+      followerRef,
+      {
+        followerList: arrayUnion(userId),
+      },
+      { merge: true }
+    )
       .then(() => {
         console.log('added in followers')
       })
@@ -80,9 +85,13 @@ const ProfileInfoComponent = ({ setUserName, id }: any) => {
   const addToFollowingList = async () => {
     const followingRef = doc(db, 'followings', userId)
 
-    await updateDoc(followingRef, {
-      followingList: arrayUnion(id),
-    })
+    await setDoc(
+      followingRef,
+      {
+        followingList: arrayUnion(id),
+      },
+      { merge: true }
+    )
       .then(() => {
         console.log('added in followings')
         setIsFollwing(true)
@@ -125,9 +134,11 @@ const ProfileInfoComponent = ({ setUserName, id }: any) => {
       return onSnapshot(doc(db, 'followers', id), (document) => {
         if (document.data() !== undefined) {
           const data = document.data()?.followerList
-          setFollowerCount(data.length)
-          if (data.includes(userId)) {
-            setIsFollwing(true)
+          if (data !== undefined) {
+            setFollowerCount(data.length)
+            if (data.includes(userId)) {
+              setIsFollwing(true)
+            }
           }
         }
       })
@@ -139,7 +150,9 @@ const ProfileInfoComponent = ({ setUserName, id }: any) => {
       return onSnapshot(doc(db, 'followings', id), (document) => {
         if (document.data() !== undefined) {
           const data = document.data()?.followingList
-          setFollowingCount(data.length)
+          if (data !== undefined) {
+            setFollowingCount(data.length)
+          }
         }
       })
     }

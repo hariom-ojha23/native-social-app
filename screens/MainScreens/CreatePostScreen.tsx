@@ -222,7 +222,10 @@ const CreatePostScreen = ({ navigation }: Props) => {
         </Surface>
         <Surface style={styles.imagesWrapper}>
           {rawImageArr.map((x, index) => (
-            <View style={{ position: 'relative', borderRadius: 10, margin: 8 }}>
+            <View
+              key={index}
+              style={{ position: 'relative', borderRadius: 10, margin: 8 }}
+            >
               <Image
                 key={index}
                 source={{ uri: x }}

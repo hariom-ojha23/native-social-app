@@ -61,6 +61,9 @@ const CommentComponent = (props: { item: Comment }) => {
         if (mid === 'hours' || mid === 'hour') {
           mid = 'h'
         }
+        if (mid === 'days' || mid === 'day') {
+          mid = 'd'
+        }
         return first + mid
     }
   }

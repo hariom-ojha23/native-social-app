@@ -1,6 +1,13 @@
 import React, { useState, useRef, useEffect, Dispatch } from 'react'
 import { View, Image, Pressable } from 'react-native'
-import { Avatar, Card, Divider, IconButton, Menu } from 'react-native-paper'
+import {
+  Avatar,
+  Card,
+  Divider,
+  IconButton,
+  Menu,
+  Snackbar,
+} from 'react-native-paper'
 import { Ionicons, Feather, MaterialIcons } from '@expo/vector-icons'
 import { BlurView } from 'expo-blur'
 import { Text } from '../../Themed'
@@ -13,6 +20,8 @@ import {
   doc,
   updateDoc,
   deleteDoc,
+  setDoc,
+  onSnapshot,
 } from 'firebase/firestore'
 import CommentModal from '../CommentModal'
 import { deleteObject, ref } from 'firebase/storage'
@@ -57,9 +66,17 @@ type PostDetail = {
 
 type Id = string
 
-const PostComponent = (props: { item: PostDetail; userId: Id }) => {
+const PostComponent = (props: {
+  item: PostDetail
+  userId: Id
+  show: boolean
+  message: string | null
+  setShow: Dispatch<boolean>
+  setMessage: Dispatch<string | null>
+}) => {
   const { item } = props
   const { userId } = props
+  const { show, setShow, message, setMessage } = props
 
   const animation = useRef<any>(null)
   const isFirstRun = useRef<any>(true)
@@ -68,6 +85,7 @@ const PostComponent = (props: { item: PostDetail; userId: Id }) => {
   const [likeCount, setLikeCount] = useState(0)
   const [commentModal, setCommentModal] = useState(false)
   const [openMenu, setOpenMenu] = useState(false)
+  const [isSaved, setIsSaved] = useState(false)
 
   useEffect(() => {
     if (item.likes.includes(userId)) {
@@ -93,6 +111,18 @@ const PostComponent = (props: { item: PostDetail; userId: Id }) => {
       animation.current.play(0, 19)
     }
   }, [isLiked])
+
+  useEffect(() => {
+    const savedPostsRef = doc(db, 'savedPosts', userId)
+    return onSnapshot(savedPostsRef, (doc) => {
+      if (doc.exists()) {
+        const data: Array<string> = doc.data().postList
+        if (data.includes(item.id)) {
+          setIsSaved(true)
+        }
+      }
+    })
+  }, [item])
 
   const likeOrUnlike = async () => {
     if (item.likes.includes(userId)) {
@@ -131,6 +161,43 @@ const PostComponent = (props: { item: PostDetail; userId: Id }) => {
       .catch((error) => console.log(error))
   }
 
+  const savePost = async () => {
+    const savedPostsRef = doc(db, 'savedPosts', userId)
+
+    await setDoc(
+      savedPostsRef,
+      {
+        postList: arrayUnion(item.id),
+      },
+      { merge: true }
+    )
+      .then(() => {
+        console.log('added in postList')
+        setMessage('Post added in Saved Post List')
+        setShow(true)
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+  }
+
+  const removeFromSavedPosts = async () => {
+    const savedPostsRef = doc(db, 'savedPosts', userId)
+
+    await updateDoc(savedPostsRef, {
+      postList: arrayRemove(item.id),
+    })
+      .then(() => {
+        console.log('removed from postList')
+        setMessage('Post removed from Saved Post List')
+        setShow(true)
+        setIsSaved(false)
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+  }
+
   return (
     <Card style={styles.card}>
       <Card.Title
@@ -153,7 +220,10 @@ const PostComponent = (props: { item: PostDetail; userId: Id }) => {
                   color='#007bff'
                 />
               )}
-              title='Save Post'
+              title={!isSaved ? 'Save Post' : 'Remove Post'}
+              onPress={
+                !isSaved ? () => savePost() : () => removeFromSavedPosts()
+              }
             />
             {userId === item.author.uid && (
               <>
@@ -218,6 +288,18 @@ const PostComponent = (props: { item: PostDetail; userId: Id }) => {
         setCommentModal={setCommentModal}
         id={item.id}
       />
+      <Snackbar
+        visible={show}
+        onDismiss={() => setShow(false)}
+        action={{
+          label: 'Close',
+          onPress: () => {
+            setShow(false)
+          },
+        }}
+      >
+        {message}
+      </Snackbar>
     </Card>
   )
 }
