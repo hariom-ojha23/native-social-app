@@ -2,11 +2,14 @@ import React, { useState, useRef, useEffect, Dispatch } from 'react'
 import { View, Image, Pressable } from 'react-native'
 import {
   Avatar,
+  Badge,
+  Caption,
   Card,
   Divider,
   IconButton,
   Menu,
   Snackbar,
+  Subheading,
 } from 'react-native-paper'
 import { Ionicons, Feather, MaterialIcons } from '@expo/vector-icons'
 import { BlurView } from 'expo-blur'
@@ -25,9 +28,10 @@ import {
 } from 'firebase/firestore'
 import CommentModal from '../CommentModal'
 import { deleteObject, ref } from 'firebase/storage'
+import Swiper from 'react-native-swiper'
 
 const CardHeaderLeftContent = (props: any) => (
-  <Avatar.Image size={45} source={{ uri: `${props.url}` }} />
+  <Avatar.Image size={47} source={{ uri: `${props.url}` }} />
 )
 
 const CardHeaderRightContent = (props: { setOpen: Dispatch<boolean> }) => {
@@ -151,6 +155,7 @@ const PostComponent = (props: {
           deleteObject(imgRef)
             .then(() => {
               console.log('Image deleted successfully')
+              setOpenMenu(false)
             })
             .catch((error) => console.log(error))
         })
@@ -245,10 +250,31 @@ const PostComponent = (props: {
         )}
       />
 
-      <View style={styles.contentContainer}>
-        <Image style={styles.image} source={{ uri: `${item.images[0].url}` }} />
-        <BlurView intensity={80} tint='dark' style={styles.actionContainer}>
-          <Card.Actions>
+      <View style={styles.captionView}>
+        <Text style={styles.caption}>{item.description}</Text>
+      </View>
+
+      <View>
+        {item.images.length > 1 ? (
+            <Swiper
+              showsPagination={true}
+              height={350}
+              loop={false}
+              horizontal={true}
+              paginationStyle={{bottom: -30}}
+            >
+              {item.images.map((item, index) => (
+                <View key={index} style={styles.slide}>
+                  <Image style={styles.image} source={{ uri: item.url }} />
+                </View>
+              ))}
+            </Swiper>
+        ) : (
+          <Image style={styles.image} source={{ uri: item.images[0].url }} />
+        )}
+
+        <Card.Actions style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 12}}>
+          <View style={{display: 'flex', flexDirection: 'row'}}>
             <Pressable
               style={[styles.actionInnerContainer, { paddingLeft: 10 }]}
               onPress={() => likeOrUnlike()}
@@ -266,22 +292,23 @@ const PostComponent = (props: {
               <IconButton
                 style={{ padding: 0, margin: 0 }}
                 icon={() => (
-                  <Ionicons name='chatbubble-sharp' size={22} color='#d3d3d3' />
+                  <Ionicons name='chatbubble-sharp' size={22} color='gray' />
                 )}
                 size={20}
                 onPress={() => setCommentModal(true)}
               />
             </View>
-            <View style={styles.actionInnerContainer}>
-              <IconButton
-                style={{ padding: 0, margin: 0 }}
-                icon={() => <Ionicons name='send' size={22} color='#d3d3d3' />}
-                size={20}
-                onPress={() => setCommentModal(true)}
-              />
-            </View>
-          </Card.Actions>
-        </BlurView>
+          </View>
+
+          <View style={styles.actionInnerContainer}>
+            <IconButton
+              style={{ padding: 0, margin: 0 }}
+              icon={() => <Ionicons name='send' size={22} color='gray' />}
+              size={20}
+              onPress={() => setCommentModal(true)}
+            />
+          </View>
+        </Card.Actions>
       </View>
       <CommentModal
         commentModal={commentModal}
