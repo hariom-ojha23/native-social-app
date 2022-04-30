@@ -19,8 +19,7 @@ const LoginScreen = ({ navigation }: RootStackScreenProps<'Login'>) => {
   const colorScheme = useColorScheme()
   const colors = Colors[colorScheme]
 
-  const emailRegex =
-    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+  const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
   const isValid = (enteredEmail: string) => {
     return emailRegex.test(enteredEmail)
@@ -81,26 +80,26 @@ const LoginScreen = ({ navigation }: RootStackScreenProps<'Login'>) => {
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            mode='outlined'
-            label='Email Address'
-            textContentType='emailAddress'
+            mode="outlined"
+            label="Email Address"
+            textContentType="emailAddress"
             value={email}
             onChange={(e) => setEmail(e.nativeEvent.text)}
-            left={<TextInput.Icon name='account' color='gray' />}
+            left={<TextInput.Icon name="account" color="gray" />}
           />
           <TextInput
             style={styles.input}
-            textContentType='password'
-            mode='outlined'
+            textContentType="password"
+            mode="outlined"
             secureTextEntry
-            label='Password'
+            label="Password"
             value={password}
             onChange={(e) => setPassword(e.nativeEvent.text)}
-            left={<TextInput.Icon name='lock' color='gray' />}
+            left={<TextInput.Icon name="lock" color="gray" />}
           />
           <Button
             style={styles.loginButton}
-            mode='contained'
+            mode="contained"
             onPress={handleSignIn}
             labelStyle={{ fontSize: 17, padding: 10 }}
           >

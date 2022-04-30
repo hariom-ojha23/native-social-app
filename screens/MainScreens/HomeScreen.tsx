@@ -45,7 +45,7 @@ const HomeScreen = ({ navigation }: RootTabScreenProps<'Home'>) => {
 
   useEffect(() => {
     if (userId !== null) {
-      return onSnapshot(doc(db, 'followings', userId), (document) => {
+      const unsub = onSnapshot(doc(db, 'followings', userId), (document) => {
         if (document.data() !== undefined) {
           const data = document.data()?.followingList
           const postsRef = collection(db, 'posts')
@@ -57,7 +57,7 @@ const HomeScreen = ({ navigation }: RootTabScreenProps<'Home'>) => {
             postsRef,
             //orderBy('createdAt', 'desc'),
             where('author.uid', 'in', temp),
-            limit(50)
+            limit(50),
           )
 
           return onSnapshot(q, (querySnapshot) => {
@@ -71,6 +71,8 @@ const HomeScreen = ({ navigation }: RootTabScreenProps<'Home'>) => {
           })
         }
       })
+
+      return () => unsub()
     } else {
       getUserId()
     }
@@ -78,7 +80,7 @@ const HomeScreen = ({ navigation }: RootTabScreenProps<'Home'>) => {
 
   useEffect(() => {
     if (userId !== null) {
-      return onSnapshot(doc(db, 'users', userId), (snap) => {
+      const unsub = onSnapshot(doc(db, 'users', userId), (snap) => {
         if (snap.data() !== undefined) {
           const data = snap.data()
           if (data !== undefined) {
@@ -86,12 +88,14 @@ const HomeScreen = ({ navigation }: RootTabScreenProps<'Home'>) => {
           }
         }
       })
+
+      return () => unsub()
     }
   }, [userId])
 
   useEffect(() => {
     if (userId !== null) {
-      return onSnapshot(doc(db, 'savedPosts', userId), (snap) => {
+      const unsub = onSnapshot(doc(db, 'savedPosts', userId), (snap) => {
         if (snap.data() !== undefined) {
           const data = snap.data()
           console.log(data)
@@ -100,6 +104,8 @@ const HomeScreen = ({ navigation }: RootTabScreenProps<'Home'>) => {
           }
         }
       })
+
+      return () => unsub()
     }
   }, [userId])
 

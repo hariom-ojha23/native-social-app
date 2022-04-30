@@ -20,8 +20,7 @@ const RegisterScreen = ({ navigation }: RootStackScreenProps<'Register'>) => {
   const colorScheme = useColorScheme()
   const colors = Colors[colorScheme]
 
-  const emailRegex =
-    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+  const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
 
   const isValid = (enteredEmail: string) => {
     return emailRegex.test(enteredEmail)
@@ -70,40 +69,40 @@ const RegisterScreen = ({ navigation }: RootStackScreenProps<'Register'>) => {
           </>
         )}
       </View>
-      <View style={(styles.upperView, { backgroundColor: colors.background })}>
+      <View style={[styles.upperView, { backgroundColor: colors.background }]}>
         <Text style={styles.login}>Register</Text>
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
-            mode='outlined'
+            mode="outlined"
             value={displayName}
-            label='Display Name'
-            textContentType='name'
+            label="Display Name"
+            textContentType="name"
             onChange={(e) => setDisplayName(e.nativeEvent.text)}
-            left={<TextInput.Icon name='account' color='gray' />}
+            left={<TextInput.Icon name="account" color="gray" />}
           />
           <TextInput
             style={styles.input}
-            mode='outlined'
-            label='Email Address'
-            textContentType='emailAddress'
+            mode="outlined"
+            label="Email Address"
+            textContentType="emailAddress"
             value={email}
             onChange={(e) => setEmail(e.nativeEvent.text)}
-            left={<TextInput.Icon name='email' color='gray' />}
+            left={<TextInput.Icon name="email" color="gray" />}
           />
           <TextInput
             style={styles.input}
-            textContentType='password'
-            mode='outlined'
+            textContentType="password"
+            mode="outlined"
             secureTextEntry
-            label='Password'
+            label="Password"
             value={password}
             onChange={(e) => setPassword(e.nativeEvent.text)}
-            left={<TextInput.Icon name='lock' color='gray' />}
+            left={<TextInput.Icon name="lock" color="gray" />}
           />
           <Button
             style={styles.registerButton}
-            mode='contained'
+            mode="contained"
             onPress={handleRegister}
             labelStyle={{ fontSize: 17, padding: 10 }}
           >
@@ -141,6 +140,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
   },
   bottomView: {
     backgroundColor: '#007fff',
