@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
-import { StyleSheet, TouchableOpacity, View } from 'react-native'
-import { TextInput, Button, Snackbar } from 'react-native-paper'
-import { Text } from '../../components/Themed'
+import { Image, StyleSheet, TouchableOpacity } from 'react-native'
+import { TextInput, Button, Snackbar, Avatar } from 'react-native-paper'
+import { Text, View } from '../../components/Themed'
 import { useKeyboard } from '../../hooks/useKeyboard'
 import { RootStackScreenProps } from '../../types'
 import { signInWithEmailAndPassword } from 'firebase/auth'
@@ -65,7 +65,85 @@ const LoginScreen = ({ navigation }: RootStackScreenProps<'Login'>) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.bottomView}>
+      <View
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
+        <View
+          style={{
+            borderRadius: isKeyBoardOpen ? 60 : 100,
+            width: isKeyBoardOpen ? 120 : 200,
+            height: isKeyBoardOpen ? 120 : 200,
+            overflow: 'hidden',
+            marginTop: 70,
+          }}
+        >
+          <Image
+            source={require('../../assets/images/logo.jpg')}
+            style={{
+              width: isKeyBoardOpen ? 120 : 200,
+              height: isKeyBoardOpen ? 120 : 200,
+            }}
+          />
+        </View>
+
+        <View style={{ width: '85%', marginTop: 20 }}>
+          <TextInput
+            style={styles.input}
+            mode="outlined"
+            label="Email Address"
+            textContentType="emailAddress"
+            keyboardType="email-address"
+            value={email}
+            onChange={(e) => setEmail(e.nativeEvent.text)}
+            left={<TextInput.Icon name="account" color="gray" />}
+          />
+
+          <TextInput
+            style={styles.input}
+            textContentType="password"
+            mode="outlined"
+            secureTextEntry
+            label="Password"
+            value={password}
+            onChange={(e) => setPassword(e.nativeEvent.text)}
+            left={<TextInput.Icon name="lock" color="gray" />}
+          />
+        </View>
+
+        <View>
+          <TouchableOpacity
+            style={styles.forgotPassword}
+            // onPress={() => navigation.navigate('Register')}
+          >
+            <Text style={styles.registerLink}>Forgot Password</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View>
+          <TouchableOpacity
+            style={styles.registerLinkContainer}
+            onPress={() => navigation.navigate('Register')}
+          >
+            <Text style={styles.registerLink}>Don't have an account? </Text>
+            <Text style={styles.registerLink}>Register now</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+      <View style={{ width: '85%' }}>
+        <Button
+          style={styles.loginButton}
+          mode="contained"
+          onPress={handleSignIn}
+          labelStyle={{ fontSize: 17, padding: 6 }}
+        >
+          Sign In
+        </Button>
+      </View>
+      {/* <View style={styles.bottomView}>
         {!isKeyBoardOpen && (
           <>
             <Text style={styles.title}>Hello Again!</Text>
@@ -74,8 +152,8 @@ const LoginScreen = ({ navigation }: RootStackScreenProps<'Login'>) => {
             </Text>
           </>
         )}
-      </View>
-      <View style={[styles.upperView, { backgroundColor: colors.background }]}>
+      </View> */}
+      {/* <View style={[styles.upperView, { backgroundColor: colors.background }]}>
         <Text style={styles.login}>Login</Text>
         <View style={styles.inputContainer}>
           <TextInput
@@ -115,7 +193,7 @@ const LoginScreen = ({ navigation }: RootStackScreenProps<'Login'>) => {
             <Text style={styles.registerLink}>Register now</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </View> */}
       <Snackbar
         visible={show}
         onDismiss={handleSnackClose}
@@ -136,54 +214,8 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     position: 'relative',
-  },
-  bottomView: {
-    backgroundColor: '#007fff',
-    width: '100%',
-    justifyContent: 'center',
-    height: '35%',
-    position: 'absolute',
-    top: 0,
-    zIndex: 1,
-  },
-  upperView: {
-    zIndex: 2,
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    height: '75%',
-    width: '100%',
-    backgroundColor: 'white',
-    position: 'absolute',
-    bottom: 0,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: '700',
-    marginHorizontal: 25,
-    color: 'white',
-    letterSpacing: 0.5,
-  },
-  subtitle: {
-    fontSize: 20,
-    fontWeight: '600',
-    marginTop: 5,
-    marginHorizontal: 25,
-    color: 'white',
-    letterSpacing: 0.5,
-  },
-  login: {
-    marginHorizontal: 25,
-    marginVertical: 30,
-    fontSize: 23,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-  },
-  inputContainer: {
-    width: '85%',
-    alignSelf: 'center',
-    marginTop: 20,
   },
   input: {
     marginTop: 12,
@@ -191,13 +223,17 @@ const styles = StyleSheet.create({
   loginButton: {
     width: '100%',
     marginTop: 20,
+    marginBottom: 10,
     backgroundColor: '#007fff',
+  },
+  forgotPassword: {
+    marginTop: 20,
   },
   registerLinkContainer: {
     display: 'flex',
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 25,
+    marginTop: 20,
   },
   registerLink: {
     fontSize: 17,

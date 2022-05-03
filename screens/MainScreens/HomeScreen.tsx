@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { StyleSheet, SafeAreaView, FlatList } from 'react-native'
+import { View } from '../../components/Themed'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 
 import { RootTabScreenProps } from '../../types'
@@ -111,24 +112,26 @@ const HomeScreen = ({ navigation }: RootTabScreenProps<'Home'>) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {userId !== null && (
-        <FlatList
-          contentContainerStyle={styles.postList}
-          data={postList}
-          keyExtractor={(_, index) => index.toString()}
-          renderItem={({ item }) => (
-            <PostComponent
-              item={item}
-              userId={userId}
-              show={show}
-              setShow={setShow}
-              message={message}
-              setMessage={setMessage}
-            />
-          )}
-          showsVerticalScrollIndicator={false}
-        />
-      )}
+      <View>
+        {userId !== null && (
+          <FlatList
+            contentContainerStyle={styles.postList}
+            data={postList}
+            keyExtractor={(_, index) => index.toString()}
+            renderItem={({ item }) => (
+              <PostComponent
+                item={item}
+                userId={userId}
+                show={show}
+                setShow={setShow}
+                message={message}
+                setMessage={setMessage}
+              />
+            )}
+            showsVerticalScrollIndicator={false}
+          />
+        )}
+      </View>
     </SafeAreaView>
   )
 }

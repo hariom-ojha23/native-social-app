@@ -22,7 +22,6 @@ const styles = StyleSheet.create({
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: 'transparent',
   },
   badge: {
     borderRadius: 50,

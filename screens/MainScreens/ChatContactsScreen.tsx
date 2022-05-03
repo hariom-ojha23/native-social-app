@@ -2,17 +2,16 @@ import React, { useState } from 'react'
 import { StyleSheet, SafeAreaView, FlatList } from 'react-native'
 import { Searchbar } from 'react-native-paper'
 import { Ionicons } from '@expo/vector-icons'
-import { RootTabScreenProps } from '../../types'
+import { RootStackScreenProps } from '../../types'
 
 import { Text, View } from '../../components/Themed'
 import useColorScheme from '../../hooks/useColorScheme'
 import Colors from '../../constants/Colors'
 
-import ChatListItem from '../../components/ChatScreen/ChatListItem'
+import ChatContactItem from '../../components/ChatScreen/ChatContactItem'
 
-type Props = RootTabScreenProps<'Chat'>
-
-const ChatScreen = ({ navigation, route }: Props) => {
+type Props = RootStackScreenProps<'ChatContacts'>
+const ChatContactsScreen = ({ navigation, route }: Props) => {
   const [searchQuery, setSearchQuery] = useState<string>('')
 
   const colorScheme = useColorScheme()
@@ -43,25 +42,24 @@ const ChatScreen = ({ navigation, route }: Props) => {
     20,
     21,
   ]
-
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background }]}
     >
       <Searchbar
-        placeholder="Search Chat"
+        placeholder="Search Contact"
         onChangeText={onChangeSearch}
         value={searchQuery}
         style={styles.searchBox}
       />
-      <View style={styles.chatListContainer}>
+      <View style={styles.contactListContainer}>
         <FlatList
           data={DATA}
           renderItem={() => (
-            <ChatListItem route={route} navigation={navigation} />
+            <ChatContactItem route={route} navigation={navigation} />
           )}
           keyExtractor={(item) => item.toString()}
-          style={styles.chatList}
+          style={styles.contactList}
           ListFooterComponent={() => (
             <View
               style={{
@@ -87,7 +85,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     marginBottom: 50,
-    paddingBottom: 50,
   },
   title: {
     fontSize: 20,
@@ -105,13 +102,12 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     paddingTop: 10,
   },
-  chatListContainer: {
+  contactListContainer: {
     width: '100%',
   },
-  chatList: {
+  contactList: {
     backgroundColor: 'transparent',
-    marginBottom: 30,
   },
 })
 
-export default ChatScreen
+export default ChatContactsScreen

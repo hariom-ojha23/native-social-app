@@ -1,13 +1,17 @@
 import React from 'react'
 import { TouchableHighlight } from 'react-native'
+
 import { Text, View } from '../../Themed'
 import { Avatar, List } from 'react-native-paper'
-import styles from '../ChatListItem/style'
-import { RootTabScreenProps } from '../../../types'
+import styles from '../ChatContactItem/style'
+import { RootStackScreenProps } from '../../../types'
 
-const ChatListItem = ({ navigation, route }: RootTabScreenProps<'Chat'>) => {
-  const name = 'Hari om Ojha'
-  const message = 'Haan bhai kya haal hai? kabhi message bhi kar liya karo'
+const ChatContactItem = ({
+  navigation,
+  route,
+}: RootStackScreenProps<'ChatContacts'>) => {
+  const name = 'Akash Kumar Sharma'
+  const username = '@hari_om_ojha'
 
   return (
     <TouchableHighlight
@@ -18,9 +22,7 @@ const ChatListItem = ({ navigation, route }: RootTabScreenProps<'Chat'>) => {
     >
       <List.Item
         title={name}
-        description={
-          message.length > 35 ? `${message.slice(0, 35)}...` : message
-        }
+        description={username}
         left={(props) => (
           <Avatar.Image
             size={50}
@@ -31,14 +33,6 @@ const ChatListItem = ({ navigation, route }: RootTabScreenProps<'Chat'>) => {
             }}
           />
         )}
-        right={(props) => (
-          <View {...props} style={styles.itemInfoBox}>
-            <Text>1d ago</Text>
-            <View style={styles.badge}>
-              <Text style={{ color: 'white' }}>3</Text>
-            </View>
-          </View>
-        )}
         style={styles.listItem}
         titleStyle={styles.listTitle}
         descriptionStyle={styles.listDescription}
@@ -47,4 +41,4 @@ const ChatListItem = ({ navigation, route }: RootTabScreenProps<'Chat'>) => {
   )
 }
 
-export default ChatListItem
+export default ChatContactItem

@@ -1,4 +1,9 @@
-import { Ionicons, AntDesign } from '@expo/vector-icons'
+import {
+  Ionicons,
+  AntDesign,
+  MaterialCommunityIcons,
+  FontAwesome,
+} from '@expo/vector-icons'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import {
   NavigationContainer,
@@ -31,6 +36,8 @@ import { auth } from '../Firebase/config'
 import EditProfileScreen from '../screens/MainScreens/EditProfileScreen'
 import OtherUserProfileScreen from '../screens/MainScreens/OtherUserProfileScreen'
 import CreatePostScreen from '../screens/MainScreens/CreatePostScreen'
+import ChatContactsScreen from '../screens/MainScreens/ChatContactsScreen'
+import ChatRoomScreen from '../screens/MainScreens/ChatRoomScreen'
 
 const Navigation = ({ colorScheme }: { colorScheme: ColorSchemeName }) => {
   const userInfo = auth.currentUser
@@ -66,31 +73,45 @@ const RootNavigator = () => {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name='Root'
+        name="Root"
         component={BottomTabNavigator}
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name='NotFound'
+        name="NotFound"
         component={NotFoundScreen}
         options={{ title: 'Oops!' }}
       />
       <Stack.Screen
-        name='EditProfile'
+        name="EditProfile"
         component={EditProfileScreen}
         options={{ headerShown: false }}
       />
       <Stack.Group screenOptions={{ presentation: 'modal' }}>
         <Stack.Screen
-          name='Search'
+          name="Search"
           component={SearchScreen}
           options={{ headerShown: false }}
         />
       </Stack.Group>
       <Stack.Group screenOptions={{ presentation: 'modal' }}>
         <Stack.Screen
-          name='OthersProfile'
+          name="OthersProfile"
           component={OtherUserProfileScreen}
+          options={{ headerShown: false }}
+        />
+      </Stack.Group>
+      <Stack.Group>
+        <Stack.Screen
+          name="ChatContacts"
+          component={ChatContactsScreen}
+          options={{ title: 'New Message' }}
+        />
+      </Stack.Group>
+      <Stack.Group>
+        <Stack.Screen
+          name="ChatRoom"
+          component={ChatRoomScreen}
           options={{ headerShown: false }}
         />
       </Stack.Group>
@@ -102,22 +123,22 @@ const AuthNavigator = () => {
   return (
     <Stack.Navigator>
       <Stack.Screen
-        name='Login'
+        name="Login"
         component={LoginScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name='Register'
+        name="Register"
         component={RegisterScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name='CompleteProfile'
+        name="CompleteProfile"
         component={CompleteProfileScreen}
         options={{ headerShown: false }}
       />
       <Stack.Screen
-        name='MainStack'
+        name="MainStack"
         component={RootNavigator}
         options={{ headerShown: false }}
       />
@@ -136,7 +157,7 @@ const BottomTabNavigator = () => {
 
   return (
     <BottomTab.Navigator
-      initialRouteName='Home'
+      initialRouteName="Home"
       screenOptions={{
         tabBarShowLabel: false,
         tabBarActiveTintColor: Colors[colorScheme].tint,
@@ -151,12 +172,12 @@ const BottomTabNavigator = () => {
       }}
     >
       <BottomTab.Screen
-        name='Home'
+        name="Home"
         component={HomeScreen}
         options={({ navigation }: RootTabScreenProps<'Home'>) => ({
           title: 'Felix',
           tabBarIcon: (tabinfo) => (
-            <Ionicons name='grid' size={24} color={tabinfo.color} />
+            <Ionicons name="grid" size={24} color={tabinfo.color} />
           ),
           headerStyle: {
             elevation: 0,
@@ -183,7 +204,7 @@ const BottomTabNavigator = () => {
                 }}
               >
                 <Ionicons
-                  name='search'
+                  name="search"
                   size={22}
                   color={Colors[colorScheme].text}
                 />
@@ -193,17 +214,42 @@ const BottomTabNavigator = () => {
         })}
       />
       <BottomTab.Screen
-        name='Chat'
+        name="Chat"
         component={ChatScreen}
-        options={{
+        options={({ navigation }: RootTabScreenProps<'Chat'>) => ({
           title: 'Chats',
           tabBarIcon: (tabinfo) => (
-            <Ionicons name='chatbubble-sharp' size={24} color={tabinfo.color} />
+            <Ionicons name="chatbubble-sharp" size={24} color={tabinfo.color} />
           ),
-        }}
+
+          headerRight: () => (
+            <Pressable
+              onPress={() => navigation.navigate('ChatContacts')}
+              style={({ pressed }) => ({
+                opacity: pressed ? 0.5 : 1,
+                marginRight: 20,
+              })}
+            >
+              <View
+                style={{
+                  padding: 3,
+                  shadowColor: '#171717',
+                  borderRadius: 8,
+                  elevation: 20,
+                }}
+              >
+                <FontAwesome
+                  name="pencil-square-o"
+                  size={22}
+                  color={Colors[colorScheme].text}
+                />
+              </View>
+            </Pressable>
+          ),
+        })}
       />
       <BottomTab.Screen
-        name='CreatePost'
+        name="CreatePost"
         component={CreatePostScreen}
         options={{
           tabBarIcon: (tabinfo) => (
@@ -220,29 +266,29 @@ const BottomTabNavigator = () => {
                 elevation: 10,
               }}
             >
-              <AntDesign size={30} name='plus' color='white' />
+              <AntDesign size={30} name="plus" color="white" />
             </View>
           ),
           headerShown: false,
         }}
       />
       <BottomTab.Screen
-        name='Notification'
+        name="Notification"
         component={NotificationScreen}
         options={{
           title: 'Notifications',
           tabBarIcon: ({ color }) => (
-            <IonIconIcon name='notifications' color={color} />
+            <IonIconIcon name="notifications" color={color} />
           ),
         }}
       />
       <BottomTab.Screen
-        name='Profile'
+        name="Profile"
         component={ProfileScreen}
         options={{
           title: 'Profile',
           tabBarIcon: ({ color }) => (
-            <IonIconIcon name='person' color={color} />
+            <IonIconIcon name="person" color={color} />
           ),
           headerShown: false,
         }}
