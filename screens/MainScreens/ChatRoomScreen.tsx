@@ -93,23 +93,60 @@ const ChatRoomScreen = ({ navigation, route }: Props) => {
         edges={['bottom', 'left', 'right']}
       >
         <FlatList
+          inverted
           data={DATA}
           renderItem={({ item }) => (
             <View>
               {item % 2 !== 0 ? (
-                <View>
-                  <Text
-                    style={{ textAlign: 'left', fontSize: 16, color: 'red' }}
-                  >
-                    askahhahd
+                <View
+                  style={{
+                    backgroundColor: '#f5f5f5',
+                    padding: 10,
+                    paddingHorizontal: 15,
+                    borderRadius: 20,
+                    borderBottomStartRadius: 0,
+                    marginVertical: 10,
+                    alignSelf: 'flex-start',
+                    maxWidth: '75%',
+                  }}
+                >
+                  <Text style={{ textAlign: 'left', fontSize: 17 }}>
+                    Hey Buddy! How are you?
                   </Text>
                 </View>
               ) : (
-                <Text
-                  style={{ textAlign: 'right', fontSize: 16, color: 'green' }}
+                <View
+                  style={{
+                    alignSelf: 'flex-end',
+                    backgroundColor: '#0080ff',
+                    padding: 10,
+                    paddingHorizontal: 15,
+                    borderRadius: 20,
+                    borderBottomEndRadius: 0,
+                    maxWidth: '75%',
+                    marginVertical: 10,
+                    display: 'flex',
+                    flexDirection: 'row',
+                    position: 'relative',
+                  }}
                 >
-                  nnvncvncvm
-                </Text>
+                  <Text
+                    style={{
+                      textAlign: 'left',
+                      fontSize: 16,
+                      color: 'white',
+                      lineHeight: 22,
+                    }}
+                  >
+                    Contrary to popular belief,It has roots in a piece of
+                    classical Latin literature from 45 BC
+                    {/* Contrary to popular belief, Lorem Ipsum is not simply random
+                    text. It has roots in a piece of classical Latin literature
+                    from 45 BC, making it over 2000 years old. Richard
+                    McClintock, a Latin professor at Hampden-Sydney College in */}
+                    Virginia
+                  </Text>
+                </View>
               )}
             </View>
           )}
@@ -131,7 +168,7 @@ const ChatRoomScreen = ({ navigation, route }: Props) => {
             <IconButton
               size={25}
               color="black"
-              icon={() => <Entypo name="emoji-happy" size={24} color="black" />}
+              icon={() => <Entypo name="emoji-happy" size={24} color="grey" />}
               onPress={() => console.log('Pressed')}
             ></IconButton>
             <TextInput
