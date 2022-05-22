@@ -1,48 +1,60 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { StyleSheet, SafeAreaView, FlatList } from 'react-native'
 import { Searchbar } from 'react-native-paper'
 import { Ionicons } from '@expo/vector-icons'
 import { RootTabScreenProps } from '../../types'
-
 import { Text, View } from '../../components/Themed'
 import useColorScheme from '../../hooks/useColorScheme'
 import Colors from '../../constants/Colors'
-
 import ChatListItem from '../../components/ChatScreen/ChatListItem'
+import { db, auth } from '../../Firebase/config'
+import {
+  collection,
+  DocumentData,
+  onSnapshot,
+  query,
+  where,
+} from 'firebase/firestore'
 
 type Props = RootTabScreenProps<'Chat'>
 
 const ChatScreen = ({ navigation, route }: Props) => {
   const [searchQuery, setSearchQuery] = useState<string>('')
+  const [chatRooms, setChatRooms] = useState<Array<DocumentData>>([])
 
+  const { currentUser } = auth
+  const userId = currentUser?.uid
   const colorScheme = useColorScheme()
   const colors = Colors[colorScheme]
 
   const onChangeSearch = (query: string) => setSearchQuery(query)
 
-  const DATA = [
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    9,
-    10,
-    11,
-    12,
-    13,
-    14,
-    15,
-    16,
-    17,
-    18,
-    19,
-    20,
-    21,
-  ]
+  useEffect(() => {
+    const getChatRooms = async () => {
+      const ref = collection(db, 'chatroom')
+      const q = query(ref, where('members', 'array-contains', userId))
+
+      const unsub = onSnapshot(q, (snapshots) => {
+        if (!snapshots.empty) {
+          const allChatRoom: Array<DocumentData> = []
+          snapshots.forEach((snap) => {
+            const data = snap.data()
+            data.id = snap.id
+
+            if (data.recentMessage) {
+              allChatRoom.push(data)
+            }
+          })
+
+          setChatRooms(allChatRoom)
+        }
+      })
+
+      return () => unsub()
+    }
+
+    getChatRooms()
+  }, [])
 
   return (
     <SafeAreaView
@@ -56,11 +68,11 @@ const ChatScreen = ({ navigation, route }: Props) => {
       />
       <View style={styles.chatListContainer}>
         <FlatList
-          data={DATA}
-          renderItem={() => (
-            <ChatListItem route={route} navigation={navigation} />
+          data={chatRooms}
+          renderItem={({ item }) => (
+            <ChatListItem item={item} navigation={navigation} />
           )}
-          keyExtractor={(item) => item.toString()}
+          keyExtractor={(item) => item.id}
           style={styles.chatList}
           ListFooterComponent={() => (
             <View

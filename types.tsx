@@ -50,3 +50,11 @@ export type RootTabScreenProps<
   BottomTabScreenProps<RootTabParamList, Screen>,
   NativeStackScreenProps<RootStackParamList>
 >
+
+export type ContactItem = {
+  displayName: string
+  userName: string
+  profilePhotoUrl: string
+  uid: string
+  roomId: string
+}

@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import { StyleSheet, SafeAreaView, FlatList } from 'react-native'
-import { Searchbar } from 'react-native-paper'
+import { Button, Searchbar } from 'react-native-paper'
 import { Ionicons } from '@expo/vector-icons'
 import { RootStackScreenProps } from '../../types'
 
@@ -8,40 +8,87 @@ import { Text, View } from '../../components/Themed'
 import useColorScheme from '../../hooks/useColorScheme'
 import Colors from '../../constants/Colors'
 
-import ChatContactItem from '../../components/ChatScreen/ChatContactItem'
+import { db, auth } from '../../Firebase/config'
+import {
+  onSnapshot,
+  doc,
+  collection,
+  query,
+  where,
+  documentId,
+  DocumentData,
+} from 'firebase/firestore'
 
-type Props = RootStackScreenProps<'ChatContacts'>
-const ChatContactsScreen = ({ navigation, route }: Props) => {
+import ChatContactItem from '../../components/ChatScreen/ChatContactItem'
+import { NavigationProp } from '@react-navigation/native'
+
+type ContactScreenProps = {
+  navigation: NavigationProp<{
+    ChatRoom: RootStackScreenProps<'ChatContacts'>
+  }>
+}
+
+const ChatContactsScreen = ({ navigation }: ContactScreenProps) => {
   const [searchQuery, setSearchQuery] = useState<string>('')
+  const [followingList, setFollowingList] = useState<Array<string>>([])
+  const [followerList, setFollowerList] = useState<Array<string>>([])
 
   const colorScheme = useColorScheme()
   const colors = Colors[colorScheme]
+  const userId = auth.currentUser?.uid
 
   const onChangeSearch = (query: string) => setSearchQuery(query)
 
-  const DATA = [
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    9,
-    10,
-    11,
-    12,
-    13,
-    14,
-    15,
-    16,
-    17,
-    18,
-    19,
-    20,
-    21,
-  ]
+  useEffect(() => {
+    getFollowerList()
+    getFollowingList()
+  }, [])
+
+  const getFollowerList = useCallback(() => {
+    if (userId !== undefined) {
+      const ref = doc(db, 'followers', userId)
+      onSnapshot(ref, (document) => {
+        if (document.exists()) {
+          const data = document.data()?.followerList
+          if (data !== undefined) {
+            setFollowerList(data)
+          }
+        }
+      })
+    }
+  }, [userId])
+
+  const getFollowingList = useCallback(() => {
+    if (userId !== undefined) {
+      const ref = doc(db, 'followings', userId)
+      onSnapshot(ref, (document) => {
+        if (document.data() !== undefined) {
+          const data = document.data()?.followingList
+          if (data !== undefined) {
+            setFollowingList(data)
+          }
+        }
+      })
+    }
+  }, [userId])
+
+  const contactList = useMemo(() => {
+    if (followerList.length !== 0 || followingList.length !== 0) {
+      const totalList = followerList.concat(followingList)
+
+      const ref = collection(db, 'users')
+      const q = query(ref, where(documentId(), 'in', totalList))
+      const arr: Array<DocumentData> = []
+      onSnapshot(q, (documents) => {
+        documents.forEach((document) => {
+          arr.push(document.data())
+        })
+      })
+
+      return arr
+    }
+  }, [followerList, followingList])
+
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: colors.background }]}
@@ -52,13 +99,14 @@ const ChatContactsScreen = ({ navigation, route }: Props) => {
         value={searchQuery}
         style={styles.searchBox}
       />
+
       <View style={styles.contactListContainer}>
         <FlatList
-          data={DATA}
-          renderItem={() => (
-            <ChatContactItem route={route} navigation={navigation} />
+          data={contactList}
+          renderItem={({ item }: DocumentData) => (
+            <ChatContactItem item={item} navigation={navigation} />
           )}
-          keyExtractor={(item) => item.toString()}
+          keyExtractor={(item) => item.uid}
           style={styles.contactList}
           ListFooterComponent={() => (
             <View
@@ -84,7 +132,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    marginBottom: 50,
   },
   title: {
     fontSize: 20,

@@ -75,22 +75,22 @@ const LoginScreen = ({ navigation }: RootStackScreenProps<'Login'>) => {
         <View
           style={{
             borderRadius: isKeyBoardOpen ? 60 : 100,
-            width: isKeyBoardOpen ? 120 : 200,
-            height: isKeyBoardOpen ? 120 : 200,
+            width: isKeyBoardOpen ? 100 : 180,
+            height: isKeyBoardOpen ? 100 : 180,
             overflow: 'hidden',
-            marginTop: 70,
+            marginTop: 50,
           }}
         >
           <Image
             source={require('../../assets/images/logo.jpg')}
             style={{
-              width: isKeyBoardOpen ? 120 : 200,
-              height: isKeyBoardOpen ? 120 : 200,
+              width: isKeyBoardOpen ? 100 : 180,
+              height: isKeyBoardOpen ? 100 : 180,
             }}
           />
         </View>
 
-        <View style={{ width: '85%', marginTop: 20 }}>
+        <View style={{ width: '85%', marginTop: 15 }}>
           <TextInput
             style={styles.input}
             mode="outlined"

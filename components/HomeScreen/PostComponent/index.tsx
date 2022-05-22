@@ -44,7 +44,7 @@ const CardHeaderRightContent = (props: { setOpen: Dispatch<boolean> }) => {
       })}
       onPress={() => setOpen(true)}
     >
-      <Feather name='more-vertical' size={24} color='gray' />
+      <Feather name="more-vertical" size={24} color="gray" />
     </Pressable>
   )
 }
@@ -62,7 +62,7 @@ type PostDetail = {
     {
       url: string
       id: string
-    }
+    },
   ]
   likes: Array<string>
   id: string
@@ -174,7 +174,7 @@ const PostComponent = (props: {
       {
         postList: arrayUnion(item.id),
       },
-      { merge: true }
+      { merge: true },
     )
       .then(() => {
         console.log('added in postList')
@@ -220,9 +220,9 @@ const PostComponent = (props: {
             <Menu.Item
               icon={() => (
                 <Ionicons
-                  name='md-bookmark-outline'
+                  name="md-bookmark-outline"
                   size={22}
-                  color='#007bff'
+                  color="#007bff"
                 />
               )}
               title={!isSaved ? 'Save Post' : 'Remove Post'}
@@ -236,12 +236,12 @@ const PostComponent = (props: {
                 <Menu.Item
                   icon={() => (
                     <MaterialIcons
-                      name='delete-outline'
+                      name="delete-outline"
                       size={24}
-                      color='#e3242b'
+                      color="#e3242b"
                     />
                   )}
-                  title='Delete Post'
+                  title="Delete Post"
                   onPress={() => deletePost()}
                 />
               </>
@@ -256,25 +256,32 @@ const PostComponent = (props: {
 
       <View>
         {item.images.length > 1 ? (
-            <Swiper
-              showsPagination={true}
-              height={350}
-              loop={false}
-              horizontal={true}
-              paginationStyle={{bottom: -30}}
-            >
-              {item.images.map((item, index) => (
-                <View key={index} style={styles.slide}>
-                  <Image style={styles.image} source={{ uri: item.url }} />
-                </View>
-              ))}
-            </Swiper>
+          <Swiper
+            showsPagination={true}
+            height={350}
+            loop={false}
+            horizontal={true}
+            paginationStyle={{ bottom: -30 }}
+          >
+            {item.images.map((item, index) => (
+              <View key={index} style={styles.slide}>
+                <Image style={styles.image} source={{ uri: item.url }} />
+              </View>
+            ))}
+          </Swiper>
         ) : (
           <Image style={styles.image} source={{ uri: item.images[0].url }} />
         )}
 
-        <Card.Actions style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 12}}>
-          <View style={{display: 'flex', flexDirection: 'row'}}>
+        <Card.Actions
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            paddingVertical: 12,
+          }}
+        >
+          <View style={{ display: 'flex', flexDirection: 'row' }}>
             <Pressable
               style={[styles.actionInnerContainer, { paddingLeft: 10 }]}
               onPress={() => likeOrUnlike()}
@@ -292,7 +299,7 @@ const PostComponent = (props: {
               <IconButton
                 style={{ padding: 0, margin: 0 }}
                 icon={() => (
-                  <Ionicons name='chatbubble-sharp' size={22} color='gray' />
+                  <Ionicons name="chatbubble-sharp" size={22} color="gray" />
                 )}
                 size={20}
                 onPress={() => setCommentModal(true)}
@@ -303,7 +310,7 @@ const PostComponent = (props: {
           <View style={styles.actionInnerContainer}>
             <IconButton
               style={{ padding: 0, margin: 0 }}
-              icon={() => <Ionicons name='send' size={22} color='gray' />}
+              icon={() => <Ionicons name="send" size={22} color="gray" />}
               size={20}
               onPress={() => setCommentModal(true)}
             />
@@ -331,4 +338,4 @@ const PostComponent = (props: {
   )
 }
 
-export default PostComponent
+export default React.memo(PostComponent)

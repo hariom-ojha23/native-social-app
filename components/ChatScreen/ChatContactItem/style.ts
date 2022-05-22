@@ -7,16 +7,16 @@ const styles = StyleSheet.create({
   listItem: {
     marginVertical: 5,
     borderRadius: 10,
-    paddingVertical: 12,
+    paddingVertical: 5,
     paddingHorizontal: 8,
   },
   listTitle: {
-    fontSize: 17,
-    marginBottom: 2.5,
+    fontSize: 16,
+    marginBottom: 1,
   },
   listDescription: {
-    marginTop: 2.5,
-    fontSize: 15,
+    marginTop: 1,
+    fontSize: 14,
   },
   itemInfoBox: {
     display: 'flex',

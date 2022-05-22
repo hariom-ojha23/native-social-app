@@ -8,7 +8,7 @@ import useColorScheme from '../../../hooks/useColorScheme'
 import Colors from '../../../constants/Colors'
 import styles from './style'
 import moment from 'moment'
-
+import { getDateAndTime } from '../../../hooks/commonFunction'
 import { db } from '../../../Firebase/config'
 import {
   addDoc,
@@ -38,36 +38,6 @@ type Comment = {
 const CommentComponent = (props: { item: Comment }) => {
   const { item } = props
 
-  const getTime = (sec: number) => {
-    const str = moment(new Date(sec * 1000)).fromNow()
-
-    switch (str) {
-      case 'in a few seconds':
-        return 'few sec'
-      case 'a few seconds ago':
-        return 'few sec'
-      case 'a minute ago':
-        return '1m'
-      case 'an hour ago':
-        return '1h'
-      case 'a day ago':
-        return '1day'
-      default:
-        const first = str.split(' ')[0]
-        let mid = str.split(' ')[1]
-        if (mid === 'minutes' || mid === 'minute') {
-          mid = 'm'
-        }
-        if (mid === 'hours' || mid === 'hour') {
-          mid = 'h'
-        }
-        if (mid === 'days' || mid === 'day') {
-          mid = 'd'
-        }
-        return first + mid
-    }
-  }
-
   return (
     <View style={{ paddingVertical: 10 }}>
       {item && (
@@ -93,7 +63,7 @@ const CommentComponent = (props: { item: Comment }) => {
           </View>
           <View style={styles.timePart}>
             {item.createdAt !== null && (
-              <Text>{getTime(item.createdAt.seconds)}</Text>
+              <Text>{getDateAndTime(item.createdAt.seconds)}</Text>
             )}
           </View>
         </View>
@@ -126,7 +96,7 @@ const CommentModal = (props: {
     const q = query(
       collection(db, 'posts', id, 'comments'),
       orderBy('createdAt', 'desc'),
-      limit(50)
+      limit(50),
     )
 
     return onSnapshot(q, (col) => {
@@ -181,7 +151,7 @@ const CommentModal = (props: {
 
   return (
     <Modal
-      animationType='slide'
+      animationType="slide"
       visible={commentModal}
       onRequestClose={() => setCommentModal(false)}
       style={{ borderStartColor: 'red' }}
@@ -209,9 +179,9 @@ const CommentModal = (props: {
             </Surface>
 
             <TextInput
-              placeholder='Write Your Comment'
+              placeholder="Write Your Comment"
               placeholderTextColor={colors.text ? colors.text : 'gray'}
-              keyboardType='default'
+              keyboardType="default"
               style={[styles.input, { color: colors.text }]}
               multiline={true}
               autoFocus={true}
@@ -220,7 +190,7 @@ const CommentModal = (props: {
             />
             <IconButton
               style={styles.sendButton}
-              icon={() => <Ionicons name='send' size={28} color='#007fff' />}
+              icon={() => <Ionicons name="send" size={28} color="#007fff" />}
               onPress={() => postComment()}
             />
           </Surface>

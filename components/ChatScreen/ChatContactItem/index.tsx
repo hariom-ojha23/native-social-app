@@ -1,35 +1,80 @@
 import React from 'react'
 import { TouchableHighlight } from 'react-native'
 
-import { Text, View } from '../../Themed'
 import { Avatar, List } from 'react-native-paper'
 import styles from '../ChatContactItem/style'
-import { RootStackScreenProps } from '../../../types'
+import { ContactItem, RootStackScreenProps } from '../../../types'
+import { NavigationProp, useNavigation } from '@react-navigation/native'
 
-const ChatContactItem = ({
-  navigation,
-  route,
-}: RootStackScreenProps<'ChatContacts'>) => {
-  const name = 'Akash Kumar Sharma'
-  const username = '@hari_om_ojha'
+import { db, auth } from '../../../Firebase/config'
+import {
+  collection,
+  DocumentData,
+  getDocs,
+  query,
+  where,
+} from 'firebase/firestore'
+
+interface Props {
+  item: ContactItem
+  navigation: NavigationProp<{
+    ChatRoom: RootStackScreenProps<'ChatRoom'>
+  }>
+}
+
+const ChatContactItem = (props: Props) => {
+  const { item, navigation } = props
+  const { currentUser } = auth
+  const userId = currentUser?.uid
+  const members = [item.uid, userId]
+  const memberHex = members.sort().join('&&')
+
+  const goToChatRoom = async () => {
+    const roomRef = collection(db, 'chatroom')
+    const q = query(roomRef, where('memberHex', '==', memberHex))
+    const docSnap = await getDocs(q)
+
+    if (docSnap.empty) {
+      navigation.navigate('ChatRoom', {
+        displayName: item.displayName,
+        profilePhotoUrl: item.profilePhotoUrl,
+        roomId: '',
+        exist: false,
+        members: members,
+      } as any)
+    } else {
+      const roomArr: Array<DocumentData> = []
+      docSnap.forEach((snap) => {
+        roomArr.push({ ...snap.data(), id: snap.id })
+      })
+
+      const room = roomArr[0]
+      navigation.navigate('ChatRoom', {
+        displayName: item.displayName,
+        profilePhotoUrl: item.profilePhotoUrl,
+        roomId: room.id,
+        exist: true,
+        members: members,
+      } as any)
+    }
+  }
 
   return (
     <TouchableHighlight
-      onPress={() => navigation.navigate('ChatRoom')}
+      onPress={() => goToChatRoom()}
       style={{ paddingHorizontal: 15 }}
       activeOpacity={1}
       underlayColor="#f5f5f5"
     >
       <List.Item
-        title={name}
-        description={username}
+        title={item.displayName}
+        description={`@${item.userName}`}
         left={(props) => (
           <Avatar.Image
             size={50}
             {...props}
             source={{
-              uri:
-                'https://firebasestorage.googleapis.com/v0/b/social-app-9923d.appspot.com/o/user%2FWTc4MP7gMQQYGBE3Y3xCM90N7793%2FprofilePhoto?alt=media&token=0d12aaeb-6411-4193-a6b0-33df74f139ee',
+              uri: `${item.profilePhotoUrl}`,
             }}
           />
         )}
@@ -41,4 +86,4 @@ const ChatContactItem = ({
   )
 }
 
-export default ChatContactItem
+export default React.memo(ChatContactItem)
